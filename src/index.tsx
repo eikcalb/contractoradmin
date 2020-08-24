@@ -1,12 +1,21 @@
+import "react-app-polyfill/ie9";
+import 'react-app-polyfill/ie11'
+import 'react-app-polyfill/stable'
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
+import { ToastProvider } from 'react-toast-notifications';
+import { BrowserRouter } from 'react-router-dom';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <ToastProvider autoDismiss={400} placement='bottom-center'>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ToastProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
