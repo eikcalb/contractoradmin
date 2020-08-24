@@ -14,4 +14,7 @@ export const STYLES: { [key: string]: React.CSSProperties } = {
         fontSize: '1.2em',
         fontWeight: 'bold'
     },
+    jobProgressBar:{
+        height:'.4em'
+    }
 }

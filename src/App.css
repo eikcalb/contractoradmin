@@ -18,7 +18,15 @@
 }
 
 .is-fullheight {
+    height: 100%;
+}
+
+.is-atleast-fullheight {
     min-height: 100%;
+}
+
+.panel.is-atleast-fullheight {
+    margin-bottom: 0.5em;
 }
 
 .footer {

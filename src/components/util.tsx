@@ -13,3 +13,23 @@ export function Loading() {
         </section>
     )
 }
+
+export function CardFragment({ header, optionsText, children, style }: { header: string, optionsText: any, children?: any, style?: React.CSSProperties }) {
+    return (
+        <div className="card" style={style}>
+            <header className='card-header'>
+                <p className='card-header-title'>{header}</p>
+                <p className='card-header-icon'>
+                    <span>
+                        {optionsText}
+                    </span>
+                </p>
+            </header>
+            <div className='card-content'>
+                <div className='container'>
+                    {children}
+                </div>
+            </div>
+        </div>
+    )
+}

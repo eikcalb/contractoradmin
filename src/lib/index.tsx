@@ -1,7 +1,7 @@
 import React, { createContext } from "react"
 import CONFIG from "./config"
 import { Redirect } from "react-router-dom"
-import { User } from "./user"
+import { User, DUMMY_USER } from "./user"
 
 class Application {
     config: Config
@@ -23,7 +23,7 @@ class Application {
 }
 
 export const DEFAULT_APPLICATION = new Application(CONFIG)
-
+DEFAULT_APPLICATION.user = DUMMY_USER
 /**
  * This is the application context used within the web application.
  * 
