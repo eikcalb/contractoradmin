@@ -67,3 +67,50 @@
 .list-item-subtitle {
     font-size: 0.8em;
 }
+
+.job-item:not(:first-of-type) .card {
+    margin-top: 0.8em;
+}
+
+.job-item .card.is-active,
+.job-item .card:hover {
+    background-color: white!important;
+}
+
+.job-detail.card {
+    display: flex;
+    flex-direction: column;
+    flex: 1
+}
+
+.job-detail.card .card-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1
+}
+
+.job-panel.panel .panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media screen and (min-width:1024px) {
+    .job-panel.panel>*:first-child {
+        border-top-right-radius: 0;
+    }
+    .job-panel.panel>*:last-child {
+        border-bottom-right-radius: 0;
+    }
+    .job-detail,
+    .job-detail .card-content .level {
+        border-top-right-radius: 1em;
+        border-bottom-right-radius: 1em;
+        border-top-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+}
+
+.job-detail .card-content .level {
+    box-shadow: 0 0.125em 0.25em rgba(10, 10, 10, .1);
+}

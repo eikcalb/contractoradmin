@@ -43,9 +43,9 @@ export default function Toolbar() {
             <div className={`navbar-menu ${state.showMenu ? 'is-active' : ''}`} >
                 <div className='navbar-start'>
                     <NavLink to={links.dashboard} exact activeClassName='is-active' className='navbar-item is-tab'>Dashboard</NavLink>
-                    <NavLink to={links.messages} exact activeClassName='is-active' className='navbar-item is-tab'>Messages</NavLink>
-                    <NavLink to={links.invoices} exact activeClassName='is-active' className='navbar-item is-tab'>Invoices</NavLink>
-                    <NavLink to={links.jobs} exact activeClassName='is-active' className='navbar-item is-tab'>Jobs</NavLink>
+                    <NavLink to={links.messages} activeClassName='is-active' className='navbar-item is-tab'>Messages</NavLink>
+                    <NavLink to={links.invoices} activeClassName='is-active' className='navbar-item is-tab'>Invoices</NavLink>
+                    <NavLink to={links.jobs} activeClassName='is-active' className='navbar-item is-tab'>Jobs</NavLink>
                 </div>
                 <div className='navbar-end'>
                     <div className='navbar-item'>

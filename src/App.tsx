@@ -9,6 +9,7 @@ import { NotificationList } from './components/notification';
 import { Switch, Route } from 'react-router-dom';
 import { Dashboard } from './pages/dashboard';
 import links from './lib/links';
+import { Jobs } from './pages/jobs';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -33,6 +34,7 @@ function App() {
             <div className='App-Body'>
               <div className='is-fullheight'>
                 <Switch>
+                  <Route component={Jobs} path={links.jobs} />
                   <Route component={Dashboard} path={links.dashboard} exact />
                 </Switch>
               </div>
