@@ -247,15 +247,6 @@ export function JobDetailUser({ job }: { job: IJob }) {
     )
 }
 
-export function generateUserJobType(user: User) {
-    switch (user.jobType) {
-        case 'onsite':
-            return <><span className='icon has-text-info'><FaMapMarkerAlt /></span> On Site</>
-        case 'remote':
-            return <><span className='icon has-text-info'><FaGlobeAfrica /></span> Remote</>
-    }
-}
-
 export function JobList({ className }: { className?: string }) {
     return (
         <div className={className}>
@@ -269,21 +260,21 @@ export function JobList({ className }: { className?: string }) {
     )
 }
 
-export function JobSideList({ className }) {
+export function JobSideList({ className, onCreateNew }) {
     return (
         <div className={`${className} panel job-panel has-background-white-ter is-flex`}>
             <div className='panel-heading is-flex is-vcentered'>
                 <p className='has-text-left'>Job Listings</p>
-                <a className='button is-rounded'><BsPencilSquare /></a>
+                <a className='button is-rounded' onClick={onCreateNew}><BsPencilSquare /></a>
             </div>
             <div className='panel-block'>
                 <div className='field has-addons' style={{ flex: 1 }}>
                     <div className='control is-expanded has-icons-left'>
-                        <input className='input is-rounded' type='search' placeholder='Search Jobs...' />
+                        <input style={{ borderRight: 0 }} className='input is-rounded' type='search' placeholder='Search Jobs...' />
                         <span className='icon is-left'><FaSearch /></span>
                     </div>
                     <div className='control'>
-                        <button className='button is-rounded'>
+                        <button style={{ borderLeft: 0 }} className='button is-rounded'>
                             <span className='icon is-right'><GoSettings onClick={() => window.alert("paparazi")} /></span>
                         </button>
                     </div>
@@ -299,6 +290,15 @@ export function JobSideList({ className }) {
             </div>
         </div>
     )
+}
+
+export function generateUserJobType(user: User) {
+    switch (user.jobType) {
+        case 'onsite':
+            return <><span className='icon has-text-info'><FaMapMarkerAlt /></span> On Site</>
+        case 'remote':
+            return <><span className='icon has-text-info'><FaGlobeAfrica /></span> Remote</>
+    }
 }
 
 export interface IJob {
@@ -335,7 +335,7 @@ export const DUMMY_JOBS: IJob[] = [
         user: DUMMY_USER,
         startTime: Date.now() - 12300000,
         endTime: Date.now(),
-        progress:80,
+        progress: 80,
         tasks: [],
         id: 'papdsdp'
     },

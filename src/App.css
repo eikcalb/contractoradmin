@@ -134,3 +134,21 @@
     height: 80px;
     width: 80px;
 }
+
+@media screen and (min-width: 769px) {
+    .modal-card,
+    .modal-content {
+        margin: 0 auto;
+        max-height: calc(100vh - 40px);
+        width: auto;
+    }
+}
+
+.job-form-field.field {
+    border-left: solid grey 2px;
+    padding-left: 1em;
+}
+
+.job-form-field.field:hover {
+    border-left: solid #3298dc 2px;
+}

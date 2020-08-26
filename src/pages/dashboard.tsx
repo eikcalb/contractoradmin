@@ -4,6 +4,7 @@ import { PaymentList } from '../components/payment'
 import { CardFragment } from "../components/util";
 import { JobListItem, JobList } from '../components/job';
 import { UserList } from '../components/user';
+import { CreateJob } from '../components/jobcreation';
 
 export function Dashboard() {
     return (

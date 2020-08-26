@@ -34,12 +34,11 @@ function App() {
             <div className='App-Body'>
               <div className='is-fullheight'>
                 <Switch>
-
-                  <Route component={Jobs} path={links.activeJobs} />
-                  <Route component={Jobs} path={links.inactiveJobs} />
                   <Route render={(props) => {
                     return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
                   }} path={links.jobs} exact />
+                  <Route component={Jobs} path={links.activeJobs} />
+                  <Route component={Jobs} path={links.inactiveJobs} />
                   <Route component={Dashboard} path={links.dashboard} exact />
                 </Switch>
               </div>
