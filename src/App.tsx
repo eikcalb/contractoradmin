@@ -6,7 +6,7 @@ import Toolbar from './components/toolbar';
 import { Loading } from './components/util';
 import { Footer } from './components/footer';
 import { NotificationList } from './components/notification';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, useHistory, Redirect, useLocation } from 'react-router-dom';
 import { Dashboard } from './pages/dashboard';
 import links from './lib/links';
 import { Jobs } from './pages/jobs';
@@ -34,7 +34,12 @@ function App() {
             <div className='App-Body'>
               <div className='is-fullheight'>
                 <Switch>
-                  <Route component={Jobs} path={links.jobs} />
+
+                  <Route component={Jobs} path={links.activeJobs} />
+                  <Route component={Jobs} path={links.inactiveJobs} />
+                  <Route render={(props) => {
+                    return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
+                  }} path={links.jobs} exact />
                   <Route component={Dashboard} path={links.dashboard} exact />
                 </Switch>
               </div>

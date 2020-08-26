@@ -4,6 +4,8 @@ export default {
     dashboard: '/',
     invoices: '/invoices',
     jobs: '/jobs',
+    activeJobs: '/jobs/active',
+    inactiveJobs: '/jobs/inactive',
     privacyPolicy: '/privacyPolicy',
     termsOfService: '/terms',
     profile: '/profile',

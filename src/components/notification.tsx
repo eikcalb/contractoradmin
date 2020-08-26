@@ -81,5 +81,19 @@ const DUMMY_NOTIFICATIONS: INotification[] = [
         type: 'progress',
         content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
         id: '23se'
+    },
+    {
+        title: 'testing 1',
+        timestamp: Date.now(),
+        type: 'location',
+        content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
+        id: '23se'
+    },
+    {
+        title: 'testing 1',
+        timestamp: Date.now(),
+        type: 'discovery',
+        content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
+        id: '23se'
     }
 ]

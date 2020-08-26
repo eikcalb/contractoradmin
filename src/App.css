@@ -72,8 +72,8 @@
     margin-top: 0.8em;
 }
 
-.job-item .card.is-active,
-.job-item .card:hover {
+.job-item.card.is-active,
+.job-item.card:hover {
     background-color: white!important;
 }
 
@@ -89,6 +89,10 @@
     flex: 1
 }
 
+.job-panel.panel {
+    flex-direction: column;
+}
+
 .job-panel.panel .panel-heading {
     display: flex;
     justify-content: space-between;
@@ -96,10 +100,12 @@
 }
 
 @media screen and (min-width:1024px) {
-    .job-panel.panel>*:first-child {
+    .job-panel.panel>*:first-child,
+    .job-panel.panel {
         border-top-right-radius: 0;
     }
-    .job-panel.panel>*:last-child {
+    .job-panel.panel>*:last-child,
+    .job-panel.panel {
         border-bottom-right-radius: 0;
     }
     .job-detail,
@@ -107,10 +113,24 @@
         border-top-right-radius: 1em;
         border-bottom-right-radius: 1em;
         border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    .job-detail .card-content .level {
         border-bottom-right-radius: 0;
+    }
+}
+
+@media screen and (max-width:1023px) {
+    .job-detail {
+        border-radius: 0 0 1em 1em;
     }
 }
 
 .job-detail .card-content .level {
     box-shadow: 0 0.125em 0.25em rgba(10, 10, 10, .1);
+}
+
+.image.is-80x80 {
+    height: 80px;
+    width: 80px;
 }

@@ -26,7 +26,7 @@ export function CardFragment({ header, optionsText, children, style }: { header:
                 </p>
             </header>
             <div className='card-content'>
-                <div className='container'>
+                <div className='container is-fluid px-0'>
                     {children}
                 </div>
             </div>

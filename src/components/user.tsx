@@ -41,7 +41,7 @@ export function UserList({ className }) {
     return (
         <div className={className}>
             {[DUMMY_USER, DUMMY_USER, DUMMY_USER, DUMMY_USER, DUMMY_USER, DUMMY_USER, DUMMY_USER, DUMMY_USER, DUMMY_USER].map(u => (
-                <Link key={u.id} to={`/f`} className='column is-3-fullhd is-4-widescreen is-6-desktop is-12-touch list-item' >
+                <Link key={u.id} to={`/f`} className='column is-4-widescreen is-6-desktop is-12-touch list-item' >
                     <UserListItem user={u} />
                 </Link>
             ))}
