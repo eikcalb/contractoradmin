@@ -1,5 +1,5 @@
 import React from 'react'
-import { FaSearch, FaMapMarkerAlt } from 'react-icons/fa'
+import { FaSearch, FaMapMarkerAlt, FaChevronLeft } from 'react-icons/fa'
 
 export function FormField({ label, className, type, placeholder, icon, showBorder = true, containerClassName = '', isTextArea = false, maxLength = Number.MAX_SAFE_INTEGER, helpTextTop = "", helpTextLeft = "", helpTextRight = "", hasAddons = false, addon = <></> }) {
     return (
@@ -41,8 +41,14 @@ export function CreateJob({ onClose, show, onComplete }) {
             <div className='modal-background'></div>
             <div className='modal-card'>
                 <header className='modal-card-head'>
-                    <div className='modal-card-title is-flex' style={{ justifyContent: 'space-between' }}>
-                        <span>New Job Listing</span>
+                    <div className='modal-card-title is-mobile is-vcentered columns'>
+                        <div className='column has-text-left'>
+                            <button className='button'><span className='icon'><FaChevronLeft /></span><span className='is-hidden-mobile'> View Current Jobs</span></button>
+                        </div>
+                        <div className='column has-text-left-mobile is-10-mobile'>
+                            <span>New Job Listing</span>
+                        </div>
+                        <a className='column is-hidden-mobile'></a>
                     </div>
                 </header>
                 <div className='modal-card-body px-0'>
