@@ -59,6 +59,10 @@
     font-size: 0.8em;
 }
 
+.list-item .card:hover {
+    box-shadow: 0 0.5em 1em 0.3px #00000033
+}
+
 .list-item-title {
     font-weight: bold;
     color: 'black'
@@ -151,4 +155,24 @@
 
 .job-form-field.field:hover {
     border-left: solid #3298dc 2px;
+}
+
+.is-active .settings-link>* {
+    border-bottom: solid 2px #3298dc;
+}
+
+.settings-link:hover {
+    background-color: #dadada;
+}
+
+.settings-detail {
+    box-shadow: -0.9px 0 1px #0005;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+@media screen and (max-width: 768px) {
+    .settings-detail {
+        box-shadow: none;
+    }
 }

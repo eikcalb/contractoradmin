@@ -1,8 +1,9 @@
 import { unix } from 'moment'
 import React from 'react'
 import { BsPencilSquare } from "react-icons/bs"
-import { FaExpandAlt, FaSearch, FaStar, FaMapMarkerAlt, FaGlobeAfrica } from 'react-icons/fa'
+import { FaExpandAlt, FaSearch, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat } from 'react-icons/fa'
 import { GoSettings } from "react-icons/go"
+import { GrUserWorker } from "react-icons/gr";
 import { Link, NavLink, Route } from 'react-router-dom'
 import { STYLES } from '../lib/theme'
 import { DUMMY_USER, User } from '../lib/user'
@@ -102,7 +103,17 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
     )
 }
 
-export function JobDetail({ job, className }: { job: IJob, className?: string }) {
+export function JobDetail({ job, className }: { job: IJob | null, className?: string }) {
+    if (!job) {
+        return (
+            <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
+                <div className='card-content is-paddingless is-flex-centered has-text-grey my-6'>
+                    <span className='my-4' ><FaHardHat fill='#811' style={{ height: "8rem", width: "8rem" }} /></span>
+                    <p className='is-uppercase is-size-6 has-text-weight-bold'>View and manage job listings</p>
+                </div>
+            </div>
+        )
+    }
     const time = unix(job.timestamp / 1000)
 
     return (

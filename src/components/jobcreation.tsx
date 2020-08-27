@@ -1,5 +1,6 @@
 import React from 'react'
 import { FaSearch, FaMapMarkerAlt, FaChevronLeft } from 'react-icons/fa'
+import { on } from 'process'
 
 export function FormField({ label, className, type, placeholder, icon, showBorder = true, containerClassName = '', isTextArea = false, maxLength = Number.MAX_SAFE_INTEGER, helpTextTop = "", helpTextLeft = "", helpTextRight = "", hasAddons = false, addon = <></> }) {
     return (
@@ -37,13 +38,13 @@ export function FormField({ label, className, type, placeholder, icon, showBorde
 
 export function CreateJob({ onClose, show, onComplete }) {
     return (
-        <div className={`modal ${show ? 'is-active' : ''}`}>
+        <form className={`modal ${show ? 'is-active' : ''}`}>
             <div className='modal-background'></div>
             <div className='modal-card'>
                 <header className='modal-card-head'>
                     <div className='modal-card-title is-mobile is-vcentered columns'>
                         <div className='column has-text-left'>
-                            <button className='button'><span className='icon'><FaChevronLeft /></span><span className='is-hidden-mobile'> View Current Jobs</span></button>
+                            <button className='button' onClick={onClose}><span className='icon'><FaChevronLeft /></span><span className='is-hidden-mobile'> View Current Jobs</span></button>
                         </div>
                         <div className='column has-text-left-mobile is-10-mobile'>
                             <span>New Job Listing</span>
@@ -58,8 +59,8 @@ export function CreateJob({ onClose, show, onComplete }) {
                             <p className='level-item has-text-right is-block has-text-grey-light has-text-centered-touch'>All fields are required to be filled out</p>
                         </div>
                         <div className='container is-fluid pb-4 px-0'>
-                            <div className='columns px-4'>
-                                <div className='column is-6 pr-4'>
+                            <div className='columns mx-0 px-4'>
+                                <div className='column is-6'>
                                     <FormField className='' containerClassName='mb-4' label="Job Type" placeholder='Begin typing a job type' type='text' icon={<FaSearch />} helpTextLeft='Search and select a job type to improve search results when finding a contractor' />
                                     <FormField className='' containerClassName='my-4' label="Title" placeholder='Provide a title for the job' type='text' icon={null} helpTextLeft='Will be seen by contractors in search result and as an active status' helpTextRight='Maximum 30 characters' maxLength={30} />
                                     <FormField className='' containerClassName='my-4' label="Description" isTextArea placeholder='Provide a description of the job' type='text' icon={null} helpTextLeft='Give a short description to improve finding a contractor that fits the job' helpTextRight='Maximum 80 characters' maxLength={80} />
@@ -71,7 +72,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                                         )}
                                     />
                                 </div>
-                                <div className='column is-6 pl-4'>
+                                <div className='column is-6'>
                                     <FormField hasAddons className='' containerClassName='mb-4' label="How many persons are needed for the job"
                                         placeholder='How many persons are needed for the job'
                                         type='number' helpTextRight='10 persons maximum per job'
@@ -101,9 +102,9 @@ export function CreateJob({ onClose, show, onComplete }) {
                 </div>
                 <footer className='modal-card-foot is-flex-centered'>
                     <button className='button' onClick={onClose}>Cancel</button>
-                    <button className='button is-info' onClick={onComplete}>Confirm</button>
+                    <button className='button is-info' type='submit' onClick={onComplete}>Confirm</button>
                 </footer>
             </div>
-        </div>
+        </form>
     )
 }

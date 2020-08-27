@@ -11,5 +11,9 @@ export default {
     profile: '/profile',
     helpCenter: '/help',
     logout: '/logout',
-    settings: '/settings'
+    settings: '/settings',
+    loginAndSecurity: '/settings',
+    paymentMethods: '/settings/payment',
+    additionalFeatures: '/settings/features',
+    legalDocuments: '/settings/legal'
 }

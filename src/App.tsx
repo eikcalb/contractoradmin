@@ -10,6 +10,7 @@ import { Switch, Route, useHistory, Redirect, useLocation } from 'react-router-d
 import { Dashboard } from './pages/dashboard';
 import links from './lib/links';
 import { Jobs } from './pages/jobs';
+import { Settings } from './pages/settings';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -34,6 +35,7 @@ function App() {
             <div className='App-Body'>
               <div className='is-fullheight'>
                 <Switch>
+                  <Route component={Settings} path={links.settings} />
                   <Route render={(props) => {
                     return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
                   }} path={links.jobs} exact />
