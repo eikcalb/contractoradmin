@@ -5,11 +5,12 @@ import { CardFragment } from "../components/util";
 import { JobListItem, JobList, JobSideList, JobDetail, DUMMY_JOBS } from '../components/job';
 import { UserList } from '../components/user';
 import { CreateJob } from '../components/jobcreation';
-import { NavLink, Route, Switch } from 'react-router-dom';
+import { NavLink, Route, Switch, Link } from 'react-router-dom';
 import links from '../lib/links';
-import { FaCog, FaCogs } from 'react-icons/fa';
+import { FaCog, FaCogs, FaApplePay, FaApple, FaPaypal, FaChevronRight } from 'react-icons/fa';
 import { APPLICATION_CONTEXT } from '../lib';
 import { unix } from 'moment';
+import { link } from 'fs';
 
 export function SettingsDetail({ title, children = <></> }) {
     return (
@@ -66,11 +67,17 @@ export function Settings() {
                                     <Route path={links.loginAndSecurity} exact render={() => (
                                         <LoginAndSecurity />
                                     )} />
+                                    <Route path={links.paymentMethods} exact render={() => (
+                                        <PaymentMethods />
+                                    )} />
+                                    <Route path={links.legalDocuments} exact render={() => (
+                                        <LegalDocuments />
+                                    )} />
                                     <Route render={() => (
                                         <div className="container is-fluid is-flex-centered settings-detail py-6">
                                             <div className='content has-text-grey'>
                                                 <span className='my-4' ><FaCogs fill='#811' style={{ height: "8rem", width: "8rem" }} /></span>
-                                                <p className='is-uppercase is-size-6 has-text-weight-bold'>View and manage job listings</p>
+                                                <p className='is-uppercase is-size-6 has-text-weight-bold'>Manage your account</p>
                                             </div>
                                         </div>
                                     )} />
@@ -106,7 +113,7 @@ export function LoginAndSecurity() {
                         </div>
                         <div className='field is-grouped is-grouped-right'>
                             <div className='control'>
-                                <button className='button is-white' onClick={() => setState({ ...state, editEmail: !state.editEmail })}>Change</button>
+                                <button className='button' onClick={() => setState({ ...state, editEmail: !state.editEmail })}>Change</button>
                             </div>
                             {state.editEmail ? (
                                 <div className='control'>
@@ -137,13 +144,131 @@ export function LoginAndSecurity() {
                         <p className='subtitle has-text-grey'>Maintain a strong, unique password to protect your account</p>
                     </div>
                     <div className='column has-text-right has-text-centered-mobile'>
-                        <div className={`control`}>
-                            <input className={`input is-static has-text-right has-text-black is-size-5 has-text-centered-mobile`} disabled value={ctx.user?.contact} />
+                        <div className={`control title`}>
+                            <button className='button is-link' onClick={() => setState({ ...state, editEmail: !state.editEmail })}>Change</button>
                         </div>
                         <p className='subtitle has-text-grey'>{state.lastPasswordChanged ? `Last modified ${state.lastPasswordChanged.calendar()}` : "Never Changed"}</p>
 
                     </div>
                 </div>
+            </>
+        )} />
+    )
+}
+
+
+export function PaymentMethods() {
+    const ctx = useContext(APPLICATION_CONTEXT)
+    const [state, setState] = useState({
+        email: ctx.user?.email, editEmail: false, isLoadingEmail: false,
+        lastPasswordChanged: ctx.user?.lastPasswordChanged ? unix(ctx.user?.lastPasswordChanged / 1000) : null
+    })
+
+    return (
+        <SettingsDetail title={"Payment Methods"} children={(
+            <>
+                <div className='columns is-unselectable'>
+                    <div className='column has-text-left has-text-centered-mobile'>
+                        <p className='title is-size-5 pb-2 is-shadowless px-0' style={{ border: 0 }}>Preferred Method</p>
+                        <p className='subtitle has-text-grey'>Selected method of payment for jobs</p>
+                    </div>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <p className='is-size-5 pb-2 is-shadowless px-0' style={{ border: 0 }}>{'VI 534***1234 12/22'}</p>
+                        <Link to={`${links.paymentMethods}/change`} >Change</Link>
+                    </div>
+                </div>
+                <div className='columns'>
+                    <div className='column has-text-left has-text-centered-mobile'>
+                        <p className='title is-size-5 pb-2 is-shadowless px-0' style={{ border: 0 }}>Other Methods</p>
+                    </div>
+                </div>
+                <div className='columns' style={{ borderTop: 0 }}>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <div className='button is-white is-large'>
+                            <span className='icon'>
+                                <FaApple size={80} />
+                            </span>
+                            <span>Apple Pay</span>
+                            <span className='icon'>
+                                <FaChevronRight size={20} />
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div className='columns'>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <div className='button is-white is-large'>
+                            <span className='icon'>
+                                <FaPaypal size={80} />
+                            </span>
+                            <span>PayPal</span>
+                            <span className='icon'>
+                                <FaChevronRight size={20} />
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div className='columns' style={{ borderBottom: 0 }}>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <Link to={`${links.paymentMethods}/add`}>+ Add a Payment Method</Link>
+                    </div>
+                </div>
+            </>
+        )} />
+    )
+}
+
+
+export function LegalDocuments() {
+    const ctx = useContext(APPLICATION_CONTEXT)
+    const [state, setState] = useState({
+        email: ctx.user?.email, editEmail: false, isLoadingEmail: false,
+        lastPasswordChanged: ctx.user?.lastPasswordChanged ? unix(ctx.user?.lastPasswordChanged / 1000) : null
+    })
+
+    return (
+        <SettingsDetail title={"Legal Documents"} children={(
+            <>
+                <Link to={`${links.legalDocuments}/useragreement`} className='columns is-vcentered is-unselectable'>
+                    <div className='column has-text-left has-text-centered-mobile'>
+                        <p className='title is-size-5 pb-2 px-0' >User Agreement</p>
+                    </div>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <p className='is-size-5 pb-2 px-0' style={{ border: 0 }}>
+                            <span className='icon'><FaChevronRight /></span>
+                        </p>
+                    </div>
+                </Link>
+                <Link to={`${links.legalDocuments}/privacy`} className='columns is-vcentered is-unselectable'>
+                    <div className='column has-text-left has-text-centered-mobile'>
+                        <p className='title is-size-5 pb-2 px-0' >Privacy Policy</p>
+                    </div>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <p className='is-size-5 pb-2 px-0' style={{ border: 0 }}>
+                            <span className='icon'><FaChevronRight /></span>
+                        </p>
+                    </div>
+                </Link>
+                <Link to={`${links.legalDocuments}/terms`} className='columns is-vcentered is-unselectable'>
+                    <div className='column has-text-left has-text-centered-mobile'>
+                        <p className='title is-size-5 pb-2 px-0' >Terms of Service</p>
+                    </div>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <p className='is-size-5 pb-2 px-0' style={{ border: 0 }}>
+                            <span className='icon'><FaChevronRight /></span>
+                        </p>
+                    </div>
+                </Link>
+                <Link to={`${links.legalDocuments}/cookie`} className='columns is-vcentered is-unselectable'>
+                    <div className='column has-text-left has-text-centered-mobile'>
+                        <p className='title is-size-5 pb-2 px-0' >Cookie Policy</p>
+                    </div>
+                    <div className='column has-text-right has-text-centered-mobile'>
+                        <p className='is-size-5 pb-2 px-0' style={{ border: 0 }}>
+                            <span className='icon'><FaChevronRight /></span>
+                        </p>
+                    </div>
+                </Link>
             </>
         )} />
     )

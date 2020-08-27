@@ -176,3 +176,11 @@
         box-shadow: none;
     }
 }
+
+.settings-detail .columns {
+    border-top: #aaa solid 1px;
+}
+
+.settings-detail .columns:last-of-type {
+    border-bottom: #aaa solid 1px;
+}
