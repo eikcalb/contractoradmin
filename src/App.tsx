@@ -11,6 +11,7 @@ import { Dashboard } from './pages/dashboard';
 import links from './lib/links';
 import { Jobs } from './pages/jobs';
 import { Settings } from './pages/settings';
+import { Messages } from './pages/messages'
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -41,6 +42,7 @@ function App() {
                   }} path={links.jobs} exact />
                   <Route component={Jobs} path={links.activeJobs} />
                   <Route component={Jobs} path={links.inactiveJobs} />
+                  <Route component={Messages} path={links.messages} />
                   <Route component={Dashboard} path={links.dashboard} exact />
                 </Switch>
               </div>
