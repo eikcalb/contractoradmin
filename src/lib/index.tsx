@@ -6,10 +6,26 @@ import { User, DUMMY_USER } from "./user"
 class Application {
     config: Config
     user?: User
+    ready: Promise<boolean>
 
     constructor(config: Config) {
         this.config = config
+        this.ready = new Promise(async (res, rej) => {
+            try {
+                await this.init()
+                res(true)
+            } catch (e) {
+                // if an error occurred during initialization, throw the error and handle within the application
+                console.log(e)
+                return rej(e)
+            }
+        })
     }
+
+    async init() {
+        return true
+    }
+
 
     signedIn(): boolean {
         return this.user && this.user?.token
@@ -51,5 +67,5 @@ export interface Config {
     appName: string
     version: string
     description: string
-hostname:string
+    hostname: string
 }
