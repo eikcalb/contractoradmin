@@ -132,7 +132,7 @@ export function LoginAndSecurity() {
                     </div>
                     <div className='column has-text-right has-text-centered-mobile'>
                         <div className={`control`}>
-                            <input className={`input is-static has-text-right has-text-black is-size-5 has-text-centered-mobile`} disabled value={ctx.user?.contact} />
+                            <input className={`input is-static has-text-right has-text-black is-size-5 has-text-centered-mobile`} disabled value={ctx.user?.phoneNumber} />
                         </div>
                         <p className='subtitle has-text-grey'>Due to restrictions, contact support to modify your phone number</p>
 
