@@ -221,9 +221,9 @@ export function JobDetailUser({ job }: { job: IJob }) {
                             <div className="column has-text-right pr-0 pb-0 is-size-6">View Profile</div>
                         </div>
                         <div className='content has-text-left'>
-                            <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user.rating} &nbsp;{generateUserJobType(job.user)}</p>
-                            <p>{job.user.description}</p>
-                            <p className='has-text-right'><span className='is-uppercase has-text-grey-light is-size-7'>member since</span> {job.user.joinDate}</p>
+                            <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user.starRate} &nbsp;{generateUserJobType(job.user)}</p>
+                            <p>{job.user.profileBio}</p>
+                            <p className='has-text-right'><span className='is-uppercase has-text-grey-light is-size-7'>member since</span> {job.user.dateCreated?.toDateString()}</p>
                         </div>
                     </div>
                 </div>
@@ -233,7 +233,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                     <tbody>
                         <tr>
                             <td className='has-text-right'>CONTACT</td>
-                            <td className='has-text-left'>{job.user.contact}</td>
+                            <td className='has-text-left'>{job.user.phoneNumber}</td>
                         </tr>
                         <tr>
                             <td className='has-text-right'>ACTIVE TASK</td>
@@ -246,7 +246,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                         <tr>
                             <td className='has-text-right'>HIGHLIGHTE SKILLS AND LICENSES</td>
                             <td className='has-text-left'>
-                                {job.user.skillsAndLicenses && job.user.skillsAndLicenses.length > 1 ? job.user.skillsAndLicenses?.map(task => <p>- {task}</p>) : `-`}
+                                {job.user.skills && job.user.skills.length > 1 ? job.user.skills?.map(task => <p>- {task}</p>) : `-`}
                             </td>
 
                         </tr>

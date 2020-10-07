@@ -12,7 +12,7 @@ class Application {
     }
 
     signedIn(): boolean {
-        return this.user && this.user.token
+        return this.user && this.user?.token
     }
 
     authGuard(redirectTo) {
@@ -51,5 +51,5 @@ export interface Config {
     appName: string
     version: string
     description: string
-
+hostname:string
 }

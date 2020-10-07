@@ -18,11 +18,11 @@ export function UserListItem({ user }: { user: User }) {
                     </div>
                     <div className='column has-text-left ml-3'>
                         <p className='title is-5 my-1'>{`${user.firstName} ${user.lastName}`}</p>
-                        <p className='is-size-5'><span className='icon has-text-info'><FaStar /></span>{user.rating}</p>
+                        <p className='is-size-5'><span className='icon has-text-info'><FaStar /></span>{user.starRate}</p>
                     </div>
                 </div>
                 <div className='content'>
-                    <p style={{ maxLines: 2, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{user.description}</p>
+                    <p style={{ maxLines: 2, whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{user.profileBio}</p>
                 </div>
             </div>
             <div className='card-footer'>
