@@ -58,7 +58,14 @@ export const APPLICATION_CONTEXT = createContext<Application>(DEFAULT_APPLICATIO
  * This context is used for managing the views within the web app.
  * Activities such as loading and splashscreen are implemented using this context.
  */
-export const VIEW_CONTEXT = createContext<any>({
+export const VIEW_CONTEXT = createContext<{
+    setSignedIn: any,
+    signedIn: null | User,
+    setAppReady: any,
+    showToolbar: any
+}>({
+    setSignedIn: (signedIn) => { },
+    signedIn: null,
     setAppReady: (ready: boolean) => { },
     showToolbar: (show: boolean) => { }
 })
