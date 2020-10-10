@@ -1,4 +1,5 @@
 export default {
+    register:'/register',
     login:'/login',
     messages: '/messages',
     home: '/',

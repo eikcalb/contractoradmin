@@ -8,31 +8,29 @@ import { CreateJob } from '../components/jobcreation';
 import { AuthHandler } from '../components/guard';
 import { VIEW_CONTEXT } from '../lib';
 
-export interface IRegister {
-    first_name: string,
-    last_name: string,
-    password: string,
-    password_verify: string,
-    email: string,
-    phone_number: string
-}
 
 export function Register() {
     const viewCTX = useContext(VIEW_CONTEXT)
     const [state, setState] = useState({ showModal: false })
-    const [formState, setFormState] = useState<IRegister>({
+    const [formState, setFormState] = useState({
         first_name: '',
         last_name: '',
         password: '',
         password_verify: '',
         email: '',
         phone_number: '',
-        showPassword:false,
-        showPasswordVerify:false
+        showPassword: false,
+        showPasswordVerify: false
     })
 
     useEffect(() => {
         viewCTX.showToolbar(false)
+        viewCTX.showFooter(false)
+
+        return () => {
+            viewCTX.showFooter(true)
+            viewCTX.showToolbar(true)
+        }
     }, [])
 
     return (

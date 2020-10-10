@@ -32,7 +32,7 @@ export default function Toolbar() {
             <div className='navbar-brand'>
                 <Link className='navbar-item' to={links.home}>
                     <FaContao style={STYLES.appLogoIcon} />
-                    <span style={STYLES.appLogoText}>{ctx.config.appName}</span>
+                    <span style={STYLES.appLogoText}>{ctx.config.name}</span>
                 </Link>
                 <a role="button" className={`navbar-burger burger ${state.showMenu ? 'is-active' : ''}`} aria-label="menu" aria-expanded="false" data-target="navbar" onClick={toggleMenu}>
                     <span aria-hidden="true"></span>

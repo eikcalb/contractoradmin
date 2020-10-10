@@ -38,7 +38,13 @@ export function FormField({ label, className, type, placeholder, icon, showBorde
 
 export function CreateJob({ onClose, show, onComplete }) {
     return (
-        <form className={`modal ${show ? 'is-active' : ''}`}>
+        <form className={`modal ${show ? 'is-active' : ''}`} onSubmit={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            // TODO: handle processing before complete
+            
+            onComplete()
+        }}>
             <div className='modal-background'></div>
             <div className='modal-card'>
                 <header className='modal-card-head'>
@@ -102,7 +108,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                 </div>
                 <footer className='modal-card-foot is-flex-centered'>
                     <button className='button' onClick={onClose}>Cancel</button>
-                    <button className='button is-info' type='submit' onClick={onComplete}>Confirm</button>
+                    <button className='button is-info' type='submit'>Confirm</button>
                 </footer>
             </div>
         </form>

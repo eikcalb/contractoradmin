@@ -14,10 +14,13 @@ import { Settings } from './pages/settings';
 import { AuthGuard } from './components/guard';
 import { User } from './lib/user';
 import { Login } from './pages/login';
+import { Register } from './pages/register';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
-  const [state, setState] = useState({ ready: false, showToolbar: true })
+  const [state, setState] = useState({ ready: false, })
+  const [showFooter, setShowFooter] = useState(true)
+  const [_showToolbar, showToolbar] = useState(true)
   const [signedIn, setSignedIn] = useState<null | User>(null)
 
   useEffect(() => {
@@ -31,19 +34,21 @@ function App() {
     signedIn,
     setSignedIn,
     setAppReady: (ready) => setState({ ...state, ready }),
-    showToolbar: (showToolbar) => setState({ ...state, showToolbar })
+    showToolbar,
+    showFooter: (showFooter) => setShowFooter(showFooter)
   }
 
   return (
     <VIEW_CONTEXT.Provider value={viewContext}>
       {state.ready ?
         <>
-          {state.showToolbar ? <Toolbar /> : null}
+          {_showToolbar ? <Toolbar /> : null}
           <div className='App-Body'>
             <div className='is-fullheight'>
               <Switch>
 
-                <Route component={Login} path={links.login} exact/>
+                <Route component={Login} path={links.login} exact />
+                <Route component={Register} path={links.register} exact />
 
                 <AuthGuard component={Settings} path={links.settings} />
                 <AuthGuard render={(props) => {
@@ -59,7 +64,7 @@ function App() {
               </Switch>
             </div>
           </div>
-          <Footer />
+          {showFooter ? <Footer /> : null}
         </> :
         <Loading />
       }
