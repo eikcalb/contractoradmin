@@ -8,12 +8,15 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { ToastProvider } from 'react-toast-notifications';
 import { BrowserRouter } from 'react-router-dom';
+import { APPLICATION_CONTEXT, DEFAULT_APPLICATION } from "./lib";
 
 ReactDOM.render(
   <React.StrictMode>
     <ToastProvider autoDismiss={400} placement='bottom-center'>
       <BrowserRouter>
-        <App />
+        <APPLICATION_CONTEXT.Provider value={DEFAULT_APPLICATION}>
+          <App />
+        </APPLICATION_CONTEXT.Provider>
       </BrowserRouter>
     </ToastProvider>
   </React.StrictMode>,

@@ -1,7 +1,9 @@
 export default {
+    register:'/register',
+    login:'/login',
     messages: '/messages',
     home: '/',
-    dashboard: '/',
+    dashboard: '/dashboard',
     invoices: '/invoices',
     jobs: '/jobs',
     activeJobs: '/jobs/active',

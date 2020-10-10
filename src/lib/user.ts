@@ -9,7 +9,7 @@ class AppUser {
     occupation: string
     city: string
     state: string
-    starRate?: number
+    starRate: number = 5.0
     email: string
     password?: string
     phoneNumber: string
