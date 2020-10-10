@@ -5,6 +5,7 @@ import { User, DUMMY_USER } from "./user"
 import { initializeStorage, KEYS, localforage } from "./storage"
 import validator from "validator"
 import { isNewExpression } from "typescript"
+import { IRegister } from "../components/auth"
 
 interface ISettings {
     lastUserName: string
@@ -213,7 +214,7 @@ export class Application {
     }
 
     // TODO
-    async addAdmin(data) {
+    async addAdmin(data: IRegister) {
         try {
             await this.validateRegister(data)
 
@@ -242,25 +243,28 @@ export class Application {
     }
 
     // TODO
-    protected async validateRegister(data) {
-        let { email, password, firstName, lastName, passwordVerify } = data
+    protected async validateRegister(data: IRegister) {
+        let { email, password, first_name, last_name, password_verify, phone_number } = data
         if (!email || !password) {
             throw new Error("Credentials not provided!")
         }
-        if (password !== passwordVerify) {
+        if (password !== password_verify) {
             throw new Error('Passwords do not match!')
         }
         email = email.trim()
-        firstName = firstName.trim()
-        lastName = lastName.trim()
-        if (!firstName || !lastName) {
+        first_name = first_name.trim()
+        last_name = last_name.trim()
+        if (!first_name || !last_name) {
             throw new Error('Firstname and lastname must be provided!')
         }
         if (!email || !validator.isEmail(email)) {
             throw new Error("Invalid username provided!")
         }
-        if (!validator.matches(password, /[a-zA-z0-9]{6,}/i)) {
-            throw new Error("Invalid password provided (Password must be alphanumeric and more than 6 characters)!")
+        if (!phone_number || !validator.isMobilePhone(phone_number)) {
+            throw new Error("Invalid phone number provided!")
+        }
+        if (!validator.matches(password, /.{6,}/i)) {
+            throw new Error("Invalid password provided (Password must be more than 6 characters)!")
         }
     }
 

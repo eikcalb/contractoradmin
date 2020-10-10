@@ -7,6 +7,7 @@ import { UserList } from '../components/user';
 import { CreateJob } from '../components/jobcreation';
 import { AuthHandler } from '../components/guard';
 import { VIEW_CONTEXT } from '../lib';
+import { RegisterView } from '../components/auth';
 
 
 export function Register() {
@@ -35,12 +36,11 @@ export function Register() {
 
     return (
         <AuthHandler>
-            <div className='columns is-gapless px-4 py-4 is-fullheight is-multiline'>
-                <JobSideList onCreateNew={() => setState({ ...state, showModal: true })} className='column is-6 is-12-touch is-clipped is-fullheight' />
-                <JobDetail job={null} className='column is-6 is-hidden-touch is-flex' />
-                <CreateJob show={state.showModal} onClose={() => setState({ ...state, showModal: false })} onComplete={() => {
-                    setState({ ...state, showModal: false })
-                }} />
+            <div className='columns is-gapless is-fullheight is-multiline'>
+                <div className='column is-flex-centered is-atleast-fullheight'>
+                    <RegisterView />
+                </div>
+                <div className='column is-6 is-hidden-touch is-flex has-background-info' />
             </div>
         </AuthHandler>
     )
