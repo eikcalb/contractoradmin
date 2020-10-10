@@ -11,14 +11,10 @@ import { Dashboard } from './pages/dashboard';
 import links from './lib/links';
 import { Jobs } from './pages/jobs';
 import { Settings } from './pages/settings';
-<<<<<<< HEAD
-import { Messages } from './pages/messages'
-=======
 import { AuthGuard } from './components/guard';
 import { User } from './lib/user';
 import { Login } from './pages/login';
 import { Register } from './pages/register';
->>>>>>> 7744c461954378a185f71cb664d5c213feef170f
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
