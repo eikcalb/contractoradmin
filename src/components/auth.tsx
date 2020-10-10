@@ -76,11 +76,11 @@ export function LoginView() {
     /**
      * Called to verify the user's number and send OTP through specified channel.
      */
-    const onSubmitCodeRequest = useCallback(async (form: { code: string }) => {
+    const onSubmitCodeRequest = useCallback(async (form: { code: string, channel: 'sms' | 'call' }) => {
         setState({ ...state, loading: true })
 
         try {
-            const done = await ctx.triggerVerification(form.code)
+            const done = await ctx.triggerVerification(form.code, form?.channel)
 
             if (!done) {
                 throw new Error('Failed to verify phone number!')
@@ -88,7 +88,7 @@ export function LoginView() {
             addToast('Verification code sent to your phone!', {
                 appearance: 'success'
             })
-            setState({ ...state, loading: false })
+            setState({ ...state, loading: false, })
         } catch (e) {
             console.log(e)
             addToast(e.message || 'Verification failed!', {
@@ -115,7 +115,7 @@ export function LoginView() {
             <p className='help mb-4 has-text-weight-bold'>Improving the experience of managing temporary services</p>
 
             {state.showCodeRequest ? (
-                <CodeRequestForm loading={state.loading} onSubmit={onSubmitCodeRequest} />
+                <CodeRequestForm onComplete={() => setState({ ...state, showCodeRequest: false })} loading={state.loading} onSubmit={onSubmitCodeRequest} />
             ) : (
                     <LoginForm onSubmit={onSubmitVerified} />
                 )}
@@ -124,9 +124,10 @@ export function LoginView() {
 }
 
 
-function CodeRequestForm({ onSubmit, loading }) {
+function CodeRequestForm({ onSubmit, loading, onComplete }) {
     const [state, setState] = useState({
         code: '',
+        channel
     })
 
     const onSubmitForm = useCallback(e => {
@@ -145,7 +146,7 @@ function CodeRequestForm({ onSubmit, loading }) {
                 </div>
 
             </div>
-            <div className='field mt-6'>
+            <div className='field mt-4'>
                 <div className='control'>
                     <button disabled={loading} className={`button is-rounded is-uppercase is-info ${loading ? 'is-loading' : ''}`} type='submit'>
                         <FaSms />&nbsp; Send Code

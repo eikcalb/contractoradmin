@@ -12,7 +12,7 @@ import { APPLICATION_CONTEXT, DEFAULT_APPLICATION } from "./lib";
 
 ReactDOM.render(
   <React.StrictMode>
-    <ToastProvider autoDismiss={400} placement='bottom-center'>
+    <ToastProvider autoDismiss={400} placement='top-center'>
       <BrowserRouter>
         <APPLICATION_CONTEXT.Provider value={DEFAULT_APPLICATION}>
           <App />
