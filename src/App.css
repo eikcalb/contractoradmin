@@ -76,6 +76,15 @@
     margin-top: 0.8em;
 }
 
+@media screen and (max-width: 768px) {
+    .message-item .name-bar>div:first-child {
+        display: flex;
+        flex: 1!important;
+    }
+}
+
+.message-item.card.is-active,
+.message-item.card:hover,
 .job-item.card.is-active,
 .job-item.card:hover {
     background-color: white!important;
