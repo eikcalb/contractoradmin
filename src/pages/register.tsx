@@ -40,7 +40,7 @@ export function Register() {
                 <div className='column is-flex-centered is-atleast-fullheight'>
                     <RegisterView />
                 </div>
-                <div className='column is-6 is-hidden-touch is-flex has-background-info' />
+                <div className='column is-6 is-hidden-touch is-flex has-background-success' />
             </div>
         </AuthHandler>
     )

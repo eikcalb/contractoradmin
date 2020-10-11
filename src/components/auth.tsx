@@ -8,9 +8,10 @@ import { CreateJob } from '../components/jobcreation';
 import { AuthHandler } from '../components/guard';
 import { APPLICATION_CONTEXT, VIEW_CONTEXT } from '../lib';
 import logo from "../logo.svg";
-import { FaPhoneAlt, FaSms, FaUser, FaEnvelope, FaKey, FaEyeSlash, FaEye, FaPlus, FaUserPlus } from 'react-icons/fa';
+import { FaPhoneAlt, FaSms, FaUser, FaEnvelope, FaKey, FaEyeSlash, FaEye, FaPlus, FaUserPlus, FaAngleDoubleRight, FaSignInAlt, FaChevronLeft } from 'react-icons/fa';
+import { RiLockPasswordLine } from 'react-icons/ri';
 import { useToasts } from 'react-toast-notifications';
-import { Link } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import links from '../lib/links';
 
 export interface IRegister {
@@ -49,11 +50,9 @@ export function RegisterView() {
     })
 
     const { addToast } = useToasts()
+    const history = useHistory()
+    const location = useLocation()
 
-
-    /**
-     * Called to verify the user's number and send OTP through specified channel.
-     */
     const onSubmit = useCallback(async (e) => {
         e.preventDefault()
         e.stopPropagation()
@@ -61,23 +60,24 @@ export function RegisterView() {
         setState({ ...state, loading: true })
 
         try {
-            const done = await ctx.addAdmin(formState)
+            const response = await ctx.addAdmin(formState)
 
-            if (!done) {
-                throw new Error('Failed to verify phone number!')
+            if (!response || !response.success) {
+                throw new Error('Failed to register user!')
             }
-            addToast('Verification code sent to your phone!', {
+            addToast('User registered successfully!', {
                 appearance: 'success'
             })
             setState({ ...state, loading: false })
+            history.push(links.login, location.state)
         } catch (e) {
             console.log(e)
-            addToast(e.message || 'Verification failed!', {
+            addToast(e.message || 'Failed to add new user!', {
                 appearance: 'error'
             })
             setState({ ...state, loading: false })
         }
-    }, [state])
+    }, [state, formState])
 
 
     return (
@@ -115,7 +115,7 @@ export function RegisterView() {
 
                 <div className='field'>
                     <div className='control has-icons-left '>
-                        <input autoComplete="off" disabled={state.loading} required value={formState.phone_number} onChange={(e) => setFormState({ ...formState, phone_number: e.target.value })} placeholder='enter your phone number...' className='input' type='tel' />
+                        <input autoComplete="off" disabled={state.loading} required value={formState.phone_number} onChange={(e) => setFormState({ ...formState, phone_number: e.target.value })} placeholder='enter your phone number include the "+" sign...' className='input' type='tel' />
                         <span className='icon is-left is-small'><FaPhoneAlt /></span>
                     </div>
                 </div>
@@ -135,7 +135,7 @@ export function RegisterView() {
 
                         <div className='field has-addons'>
                             <div className='control has-icons-left is-expanded'>
-                                <input autoComplete="off" disabled={state.loading} required value={formState.password_verify} onChange={(e) => setFormState({ ...formState, password_verify: e.target.value })} placeholder='enter your password...' className='input' type={state.showPasswordVerify ? 'text' : 'password'} />
+                                <input autoComplete="off" disabled={state.loading} required value={formState.password_verify} onChange={(e) => setFormState({ ...formState, password_verify: e.target.value })} placeholder='re-enter your password...' className='input' type={state.showPasswordVerify ? 'text' : 'password'} />
                                 <span className='icon is-left is-small'><FaKey /></span>
                             </div>
                             <div className='control'>
@@ -168,10 +168,11 @@ export function RegisterView() {
 
 export function LoginView() {
     const ctx = useContext(APPLICATION_CONTEXT)
+    const viewCTX = useContext(VIEW_CONTEXT)
     const [state, setState] = useState({
-        showModal: false,
         showCodeRequest: true,
-        loading: false
+        loading: false,
+        phone: ''
     })
 
     const { addToast } = useToasts()
@@ -180,33 +181,60 @@ export function LoginView() {
     /**
      * Called to verify the user's number and send OTP through specified channel.
      */
-    const onSubmitCodeRequest = useCallback(async (form: { code: string, channel: 'sms' | 'call' }) => {
+    const onSubmitCodeRequest = useCallback(async (form: { phone: string, channel: 'sms' | 'call' }) => {
         setState({ ...state, loading: true })
 
         try {
-            const done = await ctx.triggerVerification(form.code, form?.channel)
+            // Check if number exists in database
+            await ctx.validateNumber(form.phone)
+            // Generate OTP code for provided number
+            const done = await ctx.triggerVerification(form.phone, form?.channel)
 
             if (!done) {
                 throw new Error('Failed to verify phone number!')
             }
+
             addToast('Verification code sent to your phone!', {
                 appearance: 'success'
             })
-            setState({ ...state, loading: false, })
+            setState({ ...state, loading: false, phone: form.phone })
+            return true
         } catch (e) {
             console.log(e)
             addToast(e.message || 'Verification failed!', {
                 appearance: 'error'
             })
             setState({ ...state, loading: false })
+            return false
         }
     }, [state])
 
     /**
      * Called to login to application after the OTP has been received and inputted in the form.
      */
-    const onSubmitVerified = useCallback((form: ILogin) => {
+    const onSubmitVerified = useCallback(async (form: ILogin) => {
+        setState({ ...state, loading: true })
 
+        try {
+            const user = await ctx.login(form.phone_number, form.code, form.password)
+
+            if (!user) {
+                throw new Error('Failed to login!')
+            }
+
+            addToast('Login successful!', {
+                appearance: 'success'
+            })
+            setState({ ...state, loading: false, })
+            return true
+        } catch (e) {
+            console.log(e)
+            addToast(e.message || 'Login failed!', {
+                appearance: 'error'
+            })
+            setState({ ...state, loading: false })
+            return false
+        }
     }, [state])
 
 
@@ -221,7 +249,7 @@ export function LoginView() {
             {state.showCodeRequest ? (
                 <CodeRequestForm onComplete={() => setState({ ...state, showCodeRequest: false })} loading={state.loading} onSubmit={onSubmitCodeRequest} />
             ) : (
-                    <LoginForm onSubmit={onSubmitVerified} />
+                    <LoginForm onCancel={() => setState({ ...state, showCodeRequest: true })} loading={state.loading} phone={state.phone} onSubmit={onSubmitVerified} />
                 )}
 
             <div className='section mt-6 is-size-7'>
@@ -235,60 +263,138 @@ export function LoginView() {
 
 function CodeRequestForm({ onSubmit, loading, onComplete }) {
     const [state, setState] = useState({
-        code: '',
-        channel
+        phone: '',
+        channel: 'sms'
+    })
+    const [viewState, setView] = useState({
+        showOptions: false,
+        hold: false,
+        holdTimer: 0,
     })
 
-    const onSubmitForm = useCallback(e => {
+    let intervalID
+
+    const onSubmitForm = useCallback(async (e) => {
         e.preventDefault()
         e.stopPropagation()
 
-        onSubmit(state)
-    }, [state])
+        // Trigger code to be sent. `success` decides if the code was successfully triggered.
+        const success = await onSubmit(state)
+        if (success) {
+            let counter = 59
+
+            clearInterval(intervalID)
+            intervalID = setInterval(() => {
+                if (counter === 0) {
+                    clearInterval(intervalID)
+                    setView({ ...viewState, hold: false, showOptions: true, holdTimer: counter })
+                    return
+                }
+                setView({ ...viewState, hold: true, holdTimer: counter, showOptions: true, })
+                counter--
+            }, 1000)
+        }
+    }, [state, viewState])
 
     return (
         <form onSubmit={onSubmitForm}>
             <div className='field'>
                 <div className='control has-icons-left '>
-                    <input disabled={loading} required value={state.code} onChange={(e) => setState({ ...state, code: e.target.value })} placeholder='enter your phone number...' className='input is-rounded' type='text' />
+                    <input autoComplete="off" disabled={loading || viewState.hold} required value={state.phone} onChange={(e) => setState({ ...state, phone: e.target.value })} placeholder='enter your phone number...' className='input is-rounded' type='text' />
                     <span className='icon is-left is-small'><FaPhoneAlt /></span>
                 </div>
 
             </div>
             <div className='field mt-4'>
                 <div className='control'>
-                    <button disabled={loading} className={`button is-rounded is-uppercase is-info ${loading ? 'is-loading' : ''}`} type='submit'>
-                        <FaSms />&nbsp; Send Code
-                    </button>
+                    {viewState.showOptions ?
+                        (
+                            <button onClick={onComplete} disabled={loading} className={`button is-rounded is-uppercase is-success ${loading ? 'is-loading' : ''}`} type='button'>
+                                <FaAngleDoubleRight />&nbsp; Proceed
+                            </button>
+                        ) : (
+                            <button disabled={loading || viewState.hold} className={`button is-rounded is-uppercase is-info ${loading ? 'is-loading' : ''}`} type='submit'>
+                                {state.channel === 'sms' ? <><FaSms />&nbsp; Send Code</> : <><FaPhoneAlt />&nbsp; Call Me</>}
+                            </button>
+                        )
+                    }
                 </div>
             </div>
+
+            <div className='field is-size-7'>
+
+                {viewState.showOptions ? (
+                    <>
+                        <p className='help mt-4 mb-2'>Didn't get code? {viewState.hold ? <span className='has-text-danger'>Try again in: {viewState.holdTimer}s</span> : null}</p>
+                        <div className='control buttons has-addons is-centered'>
+                            <button onClick={() => {
+                                setView({ ...viewState, showOptions: false })
+                            }} disabled={loading || viewState.hold} className={`button has-text-weight-bold is-info is-outlined is-small is-rounded is-uppercase`} type='button'>
+                                <span className='is-size-7'>Try Again</span>
+                            </button>
+                            <button onClick={() => {
+                                setState({ ...state, channel: state.channel === 'sms' ? 'call' : 'sms' })
+                                setView({ ...viewState, showOptions: false })
+                            }} disabled={loading || viewState.hold} className={`button has-text-weight-bold is-info is-outlined is-small is-rounded is-uppercase`} type='button'>
+                                <span className='is-size-7'> {state.channel === 'sms' ? "Use voice" : "Use SMS"}</span>
+                            </button>
+                        </div>
+                    </>
+                ) : null}
+            </div>
+
         </form>
     )
 }
 
 
-function LoginForm({ onSubmit }) {
+function LoginForm({ phone, loading, onSubmit, onCancel }) {
     const [state, setState] = useState<ILogin>({
         code: '',
-        phone_number: '',
+        phone_number: phone,
         password: '',
         showPassword: false,
-        loading: false
     })
 
-    const onSubmitForm = useCallback(e => {
+    const onSubmitForm = useCallback(async (e) => {
         e.preventDefault()
         e.stopPropagation()
 
-        onSubmit(state)
+        await onSubmit(state)
     }, [state])
 
     return (
         <form onSubmit={onSubmitForm} >
             <div className='field'>
                 <div className='control has-icons-left'>
-                    <input disabled={state.loading} required value={state.phone_number} onChange={(e) => setState({ ...state, phone_number: e.target.value })} placeholder='enter your phone number...' className='input' type='tel' />
+                    <input autoComplete="off" disabled required value={state.phone_number} placeholder='enter your phone number...' className='input' type='tel' />
                     <span className='icon is-left is-small'><FaUser /></span>
+                </div>
+            </div>
+            <div className='field'>
+                <div className='control has-icons-left'>
+                    <input autoComplete="off" pattern={'/.{4}/'} max={9999} maxLength={4} minLength={4} disabled={state.loading} required value={state.code} onChange={(e) => setState({ ...state, code: e.target.value })} placeholder='enter 4 digits code...' className='input' type='number' />
+                    <span className='icon is-left is-small'><RiLockPasswordLine /></span>
+                </div>
+            </div>
+            <div className='field has-addons'>
+                <div className='control has-icons-left is-expanded'>
+                    <input autoComplete="off" disabled={state.loading} required value={state.password} onChange={(e) => setState({ ...state, password: e.target.value })} placeholder='enter your password...' className='input' type={state.showPassword ? 'text' : 'password'} />
+                    <span className='icon is-left is-small'><FaKey /></span>
+                </div>
+                <div className='control'>
+                    <button className='button' type='button' onClick={(e) => setState({ ...state, showPassword: !state.showPassword })}>{state.showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                </div>
+            </div>
+            <div className='field mt-6'>
+                <div className='control buttons is-centered'>
+                    <button onClick={onCancel} disabled={loading} className={`button is-rounded is-uppercase is-dark is-outlined`} type='button'>
+                        <FaChevronLeft />&nbsp; Back
+                    </button>
+                    <button disabled={loading} className={`button is-rounded is-uppercase is-success ${loading ? 'is-loading' : ''}`} type='submit'>
+                        <FaSignInAlt />&nbsp; Login
+                    </button>
                 </div>
             </div>
         </form>

@@ -23,6 +23,7 @@ export class Application {
     protected settings: ISettings = DEFAULT_SETTINGS
 
     logoutListener?: () => any
+    loginListener?: () => any
 
     constructor(config: Config) {
         this.config = config
@@ -58,6 +59,10 @@ export class Application {
         // check for existing user session
         try {
             await this.inflateUser()
+            // If user session exists, trigger login listener
+            if (this.loginListener) {
+                this.loginListener()
+            }
         } catch (e) {
             console.log(e)
         }
@@ -94,7 +99,7 @@ export class Application {
             headers: {
                 ...request?.headers,
                 Accept: 'application/json',
-                Authorization: authenticated ? `Bearer ${this.user?.token}` : '',
+                Authorization: authenticated ? `Bearer ${this.user?.token}` : request?.headers?.['Authorization'],
                 'Content-Type': 'application/json'
             }
         }
@@ -145,6 +150,29 @@ export class Application {
         await localforage.setItem(KEYS.USER_SESSION, this.user)
     }
 
+    async validateNumber(phone: string) {
+        if (!phone) {
+            throw new Error("Phone number must be provided!")
+        }
+        phone = phone.trim()
+        if (!phone || !validator.isMobilePhone(phone)) {
+            throw new Error("Invalid phone number provided!")
+        }
+
+        const response = await this.initiateNetworkRequest(`/users/phone/${encodeURIComponent(phone)}`, {
+            method: 'GET',
+        })
+        if (!response.ok) {
+            throw new Error((await response.json())?.message || "Verification failed!")
+        }
+
+        const jsonResponse = await response.json()
+        if (!jsonResponse.valid) {
+            throw new Error('Invalid phone number (ensure phone number is associated with a user)!')
+        }
+
+        return true
+    }
 
     async triggerVerification(phone: string, channel: string = 'sms') {
         if (!phone) {
@@ -161,7 +189,7 @@ export class Application {
             body: JSON.stringify({ phone_number: phone, channel })
         })
         if (!response.ok) {
-            throw new Error((await response.json())?.error || "Verification failed!")
+            throw new Error((await response.json())?.message || "Verification failed!")
         }
 
         return true
@@ -178,16 +206,25 @@ export class Application {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ email: username, password })
+                body: JSON.stringify({ phone_number: username, code, password })
             })
             if (!response.ok) {
-                throw new Error((await response.json())?.error || "Login failed!")
+                throw new Error((await response.json())?.message || "Login failed!")
             }
 
             const jsonResponse = await response.json()
-            console.log(jsonResponse, 'Token generated upon login')
-            this.user = new User(jsonResponse)
+            if (!jsonResponse.success) {
+                throw new Error("Login failed!")
+            }
+            this.user = await User.getUser(this, jsonResponse.userName, jsonResponse.token)
+            if (this.user.role !== 'admin') {
+                throw new Error("Authenticated access only allowed for administrators!")
+             }
+
             await this.persistUser()
+            if (this.loginListener) {
+                this.loginListener()
+            }
 
             return this.user
 
@@ -218,31 +255,27 @@ export class Application {
         try {
             await this.validateRegister(data)
 
-            const response = await this.initiateNetworkRequest('/admin/persons/new', {
+            const response = await this.initiateNetworkRequest('/users/new', {
                 method: 'POST',
-                referrerPolicy: "no-referrer",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'x-access-token': `${this.user?.token}`
-                },
-                body: JSON.stringify(data)
+                body: JSON.stringify({
+                    ...data,
+                    role: 'admin',
+                    // TODO: change to 'pending'
+                    account_status: 'accepted'
+                })
             })
             if (!response.ok) {
-                throw new Error((await response.json()).error)
+                throw new Error((await response.json())?.message)
             }
 
             const jsonResponse = await response.json()
-            const user = new User(jsonResponse)
 
-            return user
-
+            return jsonResponse
         } catch (e) {
             throw e
         }
     }
 
-    // TODO
     protected async validateRegister(data: IRegister) {
         let { email, password, first_name, last_name, password_verify, phone_number } = data
         if (!email || !password) {
@@ -271,8 +304,8 @@ export class Application {
 
     async logout() {
         this.user = undefined
-        localforage.removeItem(KEYS.USER_SESSION)
-        localforage.removeItem(KEYS.REFRESH_TOKEN)
+        await localforage.removeItem(KEYS.USER_SESSION)
+        //await localforage.removeItem(KEYS.REFRESH_TOKEN)
         if (this.logoutListener) {
             this.logoutListener()
         }

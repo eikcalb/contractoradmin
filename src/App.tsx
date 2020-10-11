@@ -15,6 +15,7 @@ import { AuthGuard } from './components/guard';
 import { User } from './lib/user';
 import { Login } from './pages/login';
 import { Register } from './pages/register';
+import { Logout } from './pages/logout';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -23,12 +24,6 @@ function App() {
   const [_showToolbar, showToolbar] = useState(true)
   const [signedIn, setSignedIn] = useState<null | User>(null)
 
-  useEffect(() => {
-    ctx.ready.then((res) => setState({ ...state, ready: true }))
-      .catch(e => {
-        console.log(e)
-      })
-  }, [])
 
   const viewContext = {
     signedIn,
@@ -37,6 +32,26 @@ function App() {
     showToolbar,
     showFooter: (showFooter) => setShowFooter(showFooter)
   }
+
+  useEffect(() => {
+    ctx.loginListener = () => {
+      if (ctx.signedIn()) {
+        viewContext.setSignedIn(ctx.user as User)
+      }
+    }
+
+    ctx.logoutListener = () => viewContext.setSignedIn(null)
+
+    ctx.ready.then((ready) => {
+      if (!ready) {
+        return console.log('Failed to start application due to an internal error.', 'Please contact application admin')
+      }
+      setState({ ...state, ready: true })
+    })
+      .catch(e => {
+        console.log(e)
+      })
+  }, [])
 
   return (
     <VIEW_CONTEXT.Provider value={viewContext}>
@@ -49,6 +64,7 @@ function App() {
 
                 <Route component={Login} path={links.login} exact />
                 <Route component={Register} path={links.register} exact />
+                <Route component={Logout} path={links.logout} exact />
 
                 <AuthGuard component={Settings} path={links.settings} />
                 <AuthGuard render={(props) => {
