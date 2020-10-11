@@ -77,6 +77,7 @@ function App() {
                 <Route path={links.home} strict={false} exact={true}>
                   {ctx.signedIn() && viewContext.signedIn ? <Redirect to={links.dashboard} /> : <Redirect to={links.login} />}
                 </Route>
+                <AuthGuard />
               </Switch>
             </div>
           </div>
