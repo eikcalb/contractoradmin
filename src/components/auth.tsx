@@ -300,7 +300,7 @@ function CodeRequestForm({ onSubmit, loading, onComplete }) {
         <form onSubmit={onSubmitForm}>
             <div className='field'>
                 <div className='control has-icons-left '>
-                    <input autoComplete="off" disabled={loading || viewState.hold} required value={state.phone} onChange={(e) => setState({ ...state, phone: e.target.value })} placeholder='enter your phone number...' className='input is-rounded' type='text' />
+                    <input autoComplete="off" disabled={loading || viewState.hold} required value={state.phone} onChange={(e) => setState({ ...state, phone: e.target.value })} placeholder='enter your phone number...' className='input is-rounded' type='tel' />
                     <span className='icon is-left is-small'><FaPhoneAlt /></span>
                 </div>
 
