@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "e88bfb5a1dbeb4be500797caad6204f4",
+    "revision": "bb72b9a1edf2a13c813c0ed6a34ea60b",
     "url": "/contractoradmin/index.html"
   },
   {
@@ -8,7 +8,7 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/contractoradmin/static/css/2.240f97b7.chunk.css"
   },
   {
-    "revision": "a403ca1a412484020bee",
+    "revision": "58bcb19cfee4d4fa7b29",
     "url": "/contractoradmin/static/css/main.83f5d92a.chunk.css"
   },
   {
@@ -20,8 +20,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/contractoradmin/static/js/2.7dc1e4bf.chunk.js.LICENSE.txt"
   },
   {
-    "revision": "a403ca1a412484020bee",
-    "url": "/contractoradmin/static/js/main.cefad7f3.chunk.js"
+    "revision": "58bcb19cfee4d4fa7b29",
+    "url": "/contractoradmin/static/js/main.1085be5d.chunk.js"
   },
   {
     "revision": "ff975ed21cdca5f9e7e8",
