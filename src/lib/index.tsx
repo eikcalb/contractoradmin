@@ -158,6 +158,9 @@ export class Application {
         if (!phone || !validator.isMobilePhone(phone)) {
             throw new Error("Invalid phone number provided!")
         }
+        if (!phone.startsWith('+')) {
+            throw new Error("Phone number must begin with '+' and contain area code!")
+        }
 
         const response = await this.initiateNetworkRequest(`/users/phone/${encodeURIComponent(phone)}`, {
             method: 'GET',
@@ -182,6 +185,9 @@ export class Application {
 
         if (!phone || !validator.isMobilePhone(phone)) {
             throw new Error("Invalid phone number provided!")
+        }
+        if (!phone.startsWith('+')) {
+            throw new Error("Phone number must begin with '+' and contain area code!")
         }
 
         const response = await this.initiateNetworkRequest('/users/sms_registration', {
@@ -219,7 +225,7 @@ export class Application {
             this.user = await User.getUser(this, jsonResponse.userName, jsonResponse.token)
             if (this.user.role !== 'admin') {
                 throw new Error("Authenticated access only allowed for administrators!")
-             }
+            }
 
             await this.persistUser()
             if (this.loginListener) {
@@ -241,6 +247,9 @@ export class Application {
 
         if (!phone || !validator.isMobilePhone(phone)) {
             throw new Error("Invalid phone number provided!")
+        }
+        if (!phone.startsWith('+')) {
+            throw new Error("Phone number must begin with '+' and contain area code!")
         }
         if (!validator.matches(password, /.{6,}/i)) {
             throw new Error("Invalid password provided (Password must be more than 6 characters)!")
@@ -295,6 +304,9 @@ export class Application {
         }
         if (!phone_number || !validator.isMobilePhone(phone_number)) {
             throw new Error("Invalid phone number provided!")
+        }
+        if (!phone_number.startsWith('+')) {
+            throw new Error("Phone number must begin with '+' and contain area code!")
         }
         if (!validator.matches(password, /.{6,}/i)) {
             throw new Error("Invalid password provided (Password must be more than 6 characters)!")
