@@ -159,7 +159,7 @@ export class Application {
             throw new Error("Invalid phone number provided!")
         }
         if (!phone.startsWith('+')) {
-            throw new Error("Phone number must begin with '+' and contain area code!")
+            throw new Error("Phone number must begin with '+' and contain country code!")
         }
 
         const response = await this.initiateNetworkRequest(`/users/phone/${encodeURIComponent(phone)}`, {
@@ -187,7 +187,7 @@ export class Application {
             throw new Error("Invalid phone number provided!")
         }
         if (!phone.startsWith('+')) {
-            throw new Error("Phone number must begin with '+' and contain area code!")
+            throw new Error("Phone number must begin with '+' and contain country code!")
         }
 
         const response = await this.initiateNetworkRequest('/users/sms_registration', {
@@ -249,7 +249,7 @@ export class Application {
             throw new Error("Invalid phone number provided!")
         }
         if (!phone.startsWith('+')) {
-            throw new Error("Phone number must begin with '+' and contain area code!")
+            throw new Error("Phone number must begin with '+' and contain country code!")
         }
         if (!validator.matches(password, /.{6,}/i)) {
             throw new Error("Invalid password provided (Password must be more than 6 characters)!")
@@ -306,7 +306,7 @@ export class Application {
             throw new Error("Invalid phone number provided!")
         }
         if (!phone_number.startsWith('+')) {
-            throw new Error("Phone number must begin with '+' and contain area code!")
+            throw new Error("Phone number must begin with '+' and contain country code!")
         }
         if (!validator.matches(password, /.{6,}/i)) {
             throw new Error("Invalid password provided (Password must be more than 6 characters)!")
