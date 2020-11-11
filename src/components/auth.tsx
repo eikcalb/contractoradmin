@@ -149,7 +149,7 @@ export function RegisterView() {
 
                 <div className='field mt-6'>
                     <div className='control'>
-                        <button disabled={state.loading} className={`button is-uppercase is-success ${state.loading ? 'is-loading' : ''}`} type='submit'>
+                        <button disabled={state.loading} className={`button is-rounded is-fullwidth is-uppercase is-success ${state.loading ? 'is-loading' : ''}`} type='submit'>
                             <FaUserPlus />&nbsp; Register
                     </button>
                     </div>

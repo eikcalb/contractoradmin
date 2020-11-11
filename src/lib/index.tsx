@@ -1,11 +1,9 @@
-import React, { createContext } from "react"
-import CONFIG from "./config"
-import { Redirect } from "react-router-dom"
-import { User, DUMMY_USER } from "./user"
-import { initializeStorage, KEYS, localforage } from "./storage"
+import { createContext } from "react"
 import validator from "validator"
-import { isNewExpression } from "typescript"
 import { IRegister } from "../components/auth"
+import CONFIG from "./config"
+import { initializeStorage, KEYS, localforage } from "./storage"
+import { DUMMY_USER, User } from "./user"
 
 interface ISettings {
     lastUserName: string
