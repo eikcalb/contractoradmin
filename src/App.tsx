@@ -1,48 +1,28 @@
-import React, { useContext, useState, useEffect } from 'react';
-import logo from './logo.svg';
+import React, { useContext, useEffect, useState } from 'react';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import './App.css';
-import { APPLICATION_CONTEXT, DEFAULT_APPLICATION, VIEW_CONTEXT } from './lib';
+import { Footer } from './components/footer';
+import { AuthGuard } from './components/guard';
 import Toolbar from './components/toolbar';
 import { Loading } from './components/util';
-import { Footer } from './components/footer';
-import { NotificationList } from './components/notification';
-import { Switch, Route, useHistory, Redirect, useLocation } from 'react-router-dom';
-import { Dashboard } from './pages/dashboard';
+import { APPLICATION_CONTEXT, VIEW_CONTEXT } from './lib';
+import './lib/firebase';
+import { Job } from './lib/job';
 import links from './lib/links';
+import { User, DUMMY_USER } from './lib/user';
+import { Dashboard } from './pages/dashboard';
 import { Jobs } from './pages/jobs';
-import { Settings } from './pages/settings';
-import { AuthGuard } from './components/guard';
-import { User } from './lib/user';
 import { Login } from './pages/login';
-import { Register } from './pages/register';
 import { Logout } from './pages/logout';
-import firebase from "firebase";
-// Required for side-effects
-import "firebase/firestore";
-import { GeoFirestore } from "geofirestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDjXx1AqIQnkyKkCPh8HZKZYyiKGfiLcbc",
-  authDomain: "contracting-app.firebaseapp.com",
-  databaseURL: "https://contracting-app.firebaseio.com",
-  projectId: "contracting-app",
-  storageBucket: "contracting-app.appspot.com",
-  messagingSenderId: "557426956160",
-  appId: "1:557426956160:web:c1393a9710ed0e40151365"
-};
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-
-export const firestore = firebase.firestore(),
-  geoFirestore = new GeoFirestore(firestore)
+import { Register } from './pages/register';
+import { Settings } from './pages/settings';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
   const [state, setState] = useState({ ready: false, })
   const [showFooter, setShowFooter] = useState(true)
   const [_showToolbar, showToolbar] = useState(true)
-  const [signedIn, setSignedIn] = useState<null | User>(null)
-
+  const [signedIn, setSignedIn] = useState<null | User>(DUMMY_USER)
 
   const viewContext = {
     signedIn,
