@@ -17,6 +17,8 @@ import { Login } from './pages/login';
 import { Register } from './pages/register';
 import { Logout } from './pages/logout';
 import firebase from "firebase";
+// Required for side-effects
+import "firebase/firestore";
 import { GeoFirestore } from "geofirestore";
 
 const firebaseConfig = {
