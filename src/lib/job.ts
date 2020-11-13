@@ -1,3 +1,5 @@
+import { geoFirestore } from "../App";
+
 export interface IJobHistory {
     employer_name: string
     employer_phone_number: string
@@ -11,4 +13,11 @@ export interface IJobHistory {
     salary?: string
     wage?: string
     description?: string
+}
+
+export namespace Job{
+    const db = geoFirestore.collection('jobs')
+    function getActiveJobs(){
+        
+    }
 }
