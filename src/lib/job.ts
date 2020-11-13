@@ -17,7 +17,8 @@ export interface IJobHistory {
 
 export namespace Job{
     const db = geoFirestore.collection('jobs')
+    
     function getActiveJobs(){
-        
+        db.where('status','==','in progress').limit(6)
     }
 }
