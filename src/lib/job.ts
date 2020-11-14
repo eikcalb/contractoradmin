@@ -1,4 +1,6 @@
 import { geoFirestore } from "./firebase";
+import firebase from 'firebase'
+import { useCallback } from "react";
 
 export interface IJob {
     employer_name: string
@@ -40,5 +42,37 @@ export class Job {
                 jobs.push(doc.data())
             })
         })
+    }
+
+    static listenForActiveJobs(callback) {
+        const unsubscribe = Job.db.where('status', '==', 'available').limit(6).onSnapshot(async snap => {
+            const jobs: IJob[] = [];
+            (snap.native as firebase.firestore.QuerySnapshot).forEach(doc => {
+                jobs.push(doc.data() as any)
+            })
+            callback(null, jobs)
+        }, err => callback(err, null))
+
+        return unsubscribe
+    }
+
+    static listenForActiveJobsWithChangeHandler({ added, modified, removed }) {
+        const unsubscribe = Job.db.where('status', '==', 'available').limit(6).onSnapshot(async snap => {
+            (snap.native as firebase.firestore.QuerySnapshot).docChanges().forEach(change => {
+                switch (change.type) {
+                    case 'added':
+                        added(change.doc)
+                        break
+                    case 'modified':
+                        modified(change.doc)
+                        break
+                    case 'removed':
+                        removed(change.doc)
+                        break
+                }
+            })
+        })
+
+        return unsubscribe
     }
 }

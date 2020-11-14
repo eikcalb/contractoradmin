@@ -17,5 +17,3 @@ firebase.initializeApp(firebaseConfig);
 
 export const firestore = firebase.firestore(),
   geoFirestore = new GeoFirestore(firestore)
-
-console.log(geoFirestore)
