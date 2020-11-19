@@ -80,6 +80,12 @@ export class User extends AppUser {
         this.lastPasswordChanged = data.lastPasswordChanged
     }
 
+    /**
+     * 
+     * @param app Application object
+     * @param id Identity of user whose detail will be fetched
+     * @param token Secret token obtained from logging into the application.
+     */
     static async getUser(app: Application, id: string, token: string) {
         try {
             const response = await app.initiateNetworkRequest(`/users/${id}`, {
@@ -99,6 +105,27 @@ export class User extends AppUser {
             const user = new User(jsonResponse, true)
             user.id = id
             user.token = token
+
+            return user
+
+        } catch (e) {
+            throw e
+        }
+    }
+
+
+    static async getUserData(app: Application, id: string) {
+        try {
+            const response = await app.initiateNetworkRequest(`/users/${id}`, {
+                method: 'GET',
+            })
+            if (!response.ok) {
+                throw new Error((await response.json())?.message || "Failed to fetch user data!")
+            }
+
+            const jsonResponse = await response.json()
+            const user = new User(jsonResponse, true)
+            user.id = id
 
             return user
 

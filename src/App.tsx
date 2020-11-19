@@ -69,7 +69,7 @@ function App() {
                 <AuthGuard render={(props) => {
                   return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
                 }} path={links.jobs} exact />
-                <AuthGuard component={Jobs} path={links.activeJobs} />
+                <Route component={Jobs} path={links.activeJobs} />
                 <AuthGuard component={Jobs} path={links.inactiveJobs} />
                 <Route component={Dashboard} path={links.dashboard} exact />
 

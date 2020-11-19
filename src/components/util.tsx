@@ -33,3 +33,18 @@ export function CardFragment({ header, optionsText, children, style }: { header:
         </div>
     )
 }
+
+
+export function debounce(func, wait: number, immediate: boolean = false) {
+    var timeout;
+    return async (...args) => {
+        var later = async () => {
+            timeout = null;
+            if (!immediate) return func(...args)
+        };
+        var callNow = immediate && !timeout;
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+        if (callNow) return func(...args)
+    };
+};

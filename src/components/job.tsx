@@ -1,4 +1,4 @@
-import { unix } from 'moment'
+import moment, { unix } from 'moment'
 import React, { useContext, useState, useEffect } from 'react'
 import { BsPencilSquare } from "react-icons/bs"
 import { FaExpandAlt, FaSearch, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat } from 'react-icons/fa'
@@ -9,24 +9,28 @@ import { STYLES } from '../lib/theme'
 import { DUMMY_USER, User } from '../lib/user'
 import links from '../lib/links'
 import { APPLICATION_CONTEXT } from '../lib'
-import { Job } from '../lib/job'
+import { Job, IJob } from '../lib/job'
 import firebase from "firebase";
 import { useToasts } from 'react-toast-notifications'
+
 export function JobListItem({ job }: { job: IJob }) {
-    const time = unix(job.timestamp / 1000)
+    const time = moment(job.date_created.toDate())
     return (
         <div className='card'>
             <div className='card-content'>
-                <div className='columns'>
+                <div className='columns mb-0'>
                     <div className='column is-6 has-text-centered-touch has-text-left'>
-                        <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{job.title}</p>
+                        <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{job.job_title}</p>
                     </div>
                     <div className='column has-text-centered-touch has-text-right'>
-                        <p>{job.location}</p>
+                        <p>{job.location_address}</p>
                     </div>
+
                 </div>
-                <div className='content'>
-                    <p>{job.description}</p>
+                <div className='columns'>
+                    <div className='column has-text-left'>
+                        <p>{job.job_type}</p>
+                    </div>
                 </div>
             </div>
             <div className='card-footer'>
@@ -36,11 +40,11 @@ export function JobListItem({ job }: { job: IJob }) {
                             <div className='columns is-vcentered is-mobile'>
                                 <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                                     <figure className='image is-flex is-32x32'>
-                                        <img className='is-rounded' src={job.user.profileImageURL} />
+                                        <img className='is-rounded' src={job.user?.profileImageURL} />
                                     </figure>
                                 </div>
                                 <div className='column is-narrow'>
-                                    <div className='title is-6'>{`${job.user.firstName} ${job.user.lastName}`}</div>
+                                    <div className='title is-6'>{`${job.user?.firstName} ${job.user?.lastName}`}</div>
                                 </div>
                                 <div className='column has-text-right'>
                                     {time.calendar()}
@@ -48,7 +52,7 @@ export function JobListItem({ job }: { job: IJob }) {
                             </div>
                         </div>
                         <div className='column is-12'>
-                            <progress className="progress is-info" style={STYLES.jobProgressBar} value={job.progress || 0} max="100">{job.progress}</progress>
+                            <progress className="progress is-info" style={STYLES.jobProgressBar} value={0} max="100">{0}</progress>
                         </div>
                     </div>
                 </div>
@@ -58,7 +62,7 @@ export function JobListItem({ job }: { job: IJob }) {
     )
 }
 
-export function JobItem({ job, to }: { job: IJob, to: any }) {
+export function JobItem({ job, to }: { job: IJobSample, to: any }) {
     const time = unix(job.timestamp / 1000)
     let endTime
     if (job.endTime) endTime = unix(job.endTime / 1000)
@@ -106,7 +110,7 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
     )
 }
 
-export function JobDetail({ job, className }: { job: IJob | null, className?: string }) {
+export function JobDetail({ job, className }: { job: IJobSample | null, className?: string }) {
     if (!job) {
         return (
             <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
@@ -142,7 +146,7 @@ export function JobDetail({ job, className }: { job: IJob | null, className?: st
     )
 }
 
-export function JobDetailTask({ job }: { job: IJob }) {
+export function JobDetailTask({ job }: { job: IJobSample }) {
     let endTime, startTime, totalTime
     if (job.endTime) endTime = unix(job.endTime / 1000)
     if (job.startTime) startTime = unix(job.startTime / 1000)
@@ -203,7 +207,7 @@ export function JobDetailTask({ job }: { job: IJob }) {
     )
 }
 
-export function JobDetailUser({ job }: { job: IJob }) {
+export function JobDetailUser({ job }: { job: IJobSample }) {
     let startTime
     if (job.startTime) startTime = unix(job.startTime / 1000)
 
@@ -269,25 +273,33 @@ export function JobList({ className }: { className?: string }) {
 
     useEffect(() => {
         setState({ ...state, loading: true })
-        const unsubscribe = Job.listenForActiveJobs((err, docs: IJob[]) => {
+        const unsubscribe = Job.listenForActiveJobs(async (err, docs: IJob[]) => {
             if (err) {
                 setState({ ...state, loading: false })
                 return addToast(err.message || 'Failed to get jobs!')
             }
-            console.log(docs)
+            docs = await Promise.all(
+                docs.map(async v => {
+                    v.user = DUMMY_USER
+                    console.log(v, 'fbase job')
+                    return v
+                })
+            )
             setState({ ...state, jobs: docs, loading: false })
         })
 
         return unsubscribe
-    },[])
+    }, [])
 
     return (
         <div className={className}>
-            {state.jobs.map(j => (
-                <Link key={j.id} to={`/${j.id}`} className='column is-4-fullhd is-6-desktop is-12-touch list-item' >
-                    <JobListItem job={j} />
-                </Link>
-            ))}
+            {state.loading ?
+                <progress className="progress is-small is-info my-6" max="100">loading</progress>
+                : state.jobs.map(j => (
+                    <Link key={j.id} to={`/${j.id}`} className='column is-4-fullhd is-6-desktop is-12-touch list-item' >
+                        <JobListItem job={j} />
+                    </Link>
+                ))}
         </div>
     )
 }
@@ -333,7 +345,7 @@ export function generateUserJobType(user: User) {
     }
 }
 
-export interface IJob {
+export interface IJobSample {
     user: User
     timestamp: number
     title: string
@@ -347,7 +359,7 @@ export interface IJob {
     id
 }
 
-export const DUMMY_JOBS: IJob[] = [
+export const DUMMY_JOBS: IJobSample[] = [
     {
         description: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quam, nihil ipsam. Accusamus officiis aut velit voluptatum quis eligendi veniam nam.",
         title: "Lorem ipsum dolor sit.",
@@ -422,7 +434,7 @@ export const DUMMY_JOBS: IJob[] = [
     }
 ]
 
-const DUMMY_COMPLETED: IJob[] = [
+const DUMMY_COMPLETED: IJobSample[] = [
     {
         description: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quam, nihil ipsam. Accusamus officiis aut velit voluptatum quis eligendi veniam nam.",
         title: "Lorem ipsum dolor sit.",
