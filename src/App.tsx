@@ -16,6 +16,7 @@ import { Login } from './pages/login';
 import { Logout } from './pages/logout';
 import { Register } from './pages/register';
 import { Settings } from './pages/settings';
+import { Messages } from './pages/messages';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -60,7 +61,6 @@ function App() {
           <div className='App-Body'>
             <div className='is-fullheight'>
               <Switch>
-
                 <Route component={Login} path={links.login} exact />
                 <Route component={Register} path={links.register} exact />
                 <Route component={Logout} path={links.logout} exact />
@@ -69,9 +69,10 @@ function App() {
                 <AuthGuard render={(props) => {
                   return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
                 }} path={links.jobs} exact />
-                <Route component={Jobs} path={links.activeJobs} />
-                <AuthGuard component={Jobs} path={links.inactiveJobs} />
-                <Route component={Dashboard} path={links.dashboard} exact />
+                <Route component={Jobs} path={links._jobItem.active} />
+                <AuthGuard component={Jobs} path={links._jobItem.inactive} />
+                <Route component={Messages} path={links._messages} />
+                <AuthGuard component={Dashboard} path={links.dashboard} exact />
 
                 <Route path={links.home} strict={false} exact={true}>
                   {ctx.signedIn() && viewContext.signedIn ? <Redirect to={links.dashboard} /> : <Redirect to={links.login} />}

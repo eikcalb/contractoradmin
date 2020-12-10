@@ -34,6 +34,7 @@ export interface IJob {
     tasks: { id: string, text: string }[]
     wage: "hr"
     required_count: number
+    progress?:number
     user?: User
 }
 
@@ -55,17 +56,6 @@ export interface IJobHistory {
 export class Job {
     private static db = geoFirestore.collection('jobs')
     private static types = geoFirestore.collection('types')
-
-    static async getActiveJobs() {
-        return Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(6).get().then(async snap => {
-            const jobs: IJob[] = []
-            snap.forEach(async doc => {
-                const item: any = doc.data()
-                item.id = doc.id
-                jobs.push(item)
-            })
-        })
-    }
 
     static async getJobTypes(app: Application) {
         return Job.types.doc('jobs').get().then(async snap => {
@@ -102,13 +92,35 @@ export class Job {
         }
 
         job.coordinates = new firebase.firestore.GeoPoint(job.location.coords.latitude, job.location.coords.longitude)
-        console.log(job, 'newJob for posting')
 
         const newDoc = Job.db.doc()
         job.id = newDoc.id
         return newDoc.set(job)
     }
 
+    static async getInactiveJobs(limit = 20) {
+        return Job.db.where('status', '==', "complete").native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
+            const jobs: IJob[] = []
+            snap.forEach( doc => {
+                const item: any = doc.data()
+                item.id = doc.id
+                jobs.push(item)
+            })
+            return Promise.resolve(jobs)
+        })
+    }
+
+    static async getActiveJobs() {
+        return Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(6).get().then(async snap => {
+            const jobs: IJob[] = []
+            snap.forEach(async doc => {
+                const item: any = doc.data()
+                item.id = doc.id
+                jobs.push(item)
+            })
+            return Promise.resolve(jobs)
+        })
+    }
 
     static listenForActiveJobs(callback) {
         const unsubscribe = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).limit(6).onSnapshot(async snap => {

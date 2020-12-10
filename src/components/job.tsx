@@ -1,17 +1,12 @@
 import moment, { unix } from 'moment'
-import React, { useContext, useState, useEffect } from 'react'
-import { BsPencilSquare } from "react-icons/bs"
-import { FaExpandAlt, FaSearch, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat } from 'react-icons/fa'
-import { GoSettings } from "react-icons/go"
+import React from 'react'
+import { FaExpandAlt, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat } from 'react-icons/fa'
 import { GrUserWorker } from "react-icons/gr";
-import { Link, NavLink, Route } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { STYLES } from '../lib/theme'
 import { DUMMY_USER, User } from '../lib/user'
-import links from '../lib/links'
-import { APPLICATION_CONTEXT } from '../lib'
-import { Job, IJob } from '../lib/job'
+import { IJob } from '../lib/job'
 import firebase from "firebase";
-import { useToasts } from 'react-toast-notifications'
 
 export function JobListItem({ job }: { job: IJob }) {
     const time = moment(job.date_created.toDate())
@@ -62,10 +57,10 @@ export function JobListItem({ job }: { job: IJob }) {
     )
 }
 
-export function JobItem({ job, to }: { job: IJobSample, to: any }) {
-    const time = unix(job.timestamp / 1000)
+export function JobItem({ job, to }: { job: IJob, to: any }) {
+    const time = moment(job.date_created.toMillis())
     let endTime
-    if (job.endTime) endTime = unix(job.endTime / 1000)
+    if (job.date_completed) endTime = moment(job.date_completed.toMillis())
 
     return (
         <NavLink activeClassName="is-active" to={to} className={`job-item mb-8 is-block card is-shadowless has-background-white-ter`}>
@@ -73,27 +68,27 @@ export function JobItem({ job, to }: { job: IJobSample, to: any }) {
                 <div className='container is-paddingless'>
                     <div className='columns'>
                         <div className='column is-6 has-text-centered-touch has-text-left'>
-                            <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{job.title}</p>
+                            <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{job.job_title}</p>
                         </div>
                         <div className='column has-text-centered-touch has-text-right'>
-                            <p>{job.location}</p>
+                            <p>{job.location_address}</p>
                         </div>
                     </div>
                     <div className='columns is-vcentered is-mobile'>
                         <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                             <figure className='image is-flex is-32x32'>
-                                <img className='is-rounded' src={job.user.profileImageURL} />
+                                <img className='is-rounded' src={job.user?.profileImageURL} />
                             </figure>
                         </div>
                         <div className='column is-narrow'>
-                            <div className='title is-6'>{`${job.user.firstName} ${job.user.lastName}`}</div>
+                            <div className='title is-6'>{`${job.user?.firstName||'John'} ${job.user?.lastName||"Doe"}`}</div>
                         </div>
                         <div className='column has-text-right'>
                             {time.calendar()}
                         </div>
                     </div>
                     <div className='content'>
-                        <p>{job.description}</p>
+                        <p>{job.job_description}</p>
                     </div>
                 </div>
                 <div className='columns px-4 pt-4 is-vcentered is-mobile' style={{ flexDirection: 'column', flex: 1 }}>
@@ -110,7 +105,7 @@ export function JobItem({ job, to }: { job: IJobSample, to: any }) {
     )
 }
 
-export function JobDetail({ job, className }: { job: IJobSample | null, className?: string }) {
+export function JobDetail({ job, className }: { job: IJob | null, className?: string }) {
     if (!job) {
         return (
             <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
@@ -121,14 +116,14 @@ export function JobDetail({ job, className }: { job: IJobSample | null, classNam
             </div>
         )
     }
-    const time = unix(job.timestamp / 1000)
+    const time = moment(job.date_created.toMillis())
 
     return (
         <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
             <div className='card-content is-paddingless'>
                 <div className='level py-4 mb-0'>
                     <div className='level-item is-size-6'>POSTED {time.calendar()}</div>
-                    <div className='level-item is-size-4 has-text-weight-bold'>{job.title}</div>
+                    <div className='level-item is-size-4 has-text-weight-bold'>{job.job_title}</div>
                     <div className='level-item is-size-6'>{job.id}</div>
                 </div>
                 <div className='container is-fluid px-0'>
@@ -146,11 +141,11 @@ export function JobDetail({ job, className }: { job: IJobSample | null, classNam
     )
 }
 
-export function JobDetailTask({ job }: { job: IJobSample }) {
+export function JobDetailTask({ job }: { job: IJob }) {
     let endTime, startTime, totalTime
-    if (job.endTime) endTime = unix(job.endTime / 1000)
-    if (job.startTime) startTime = unix(job.startTime / 1000)
-    if (job.endTime && job.startTime) totalTime = endTime.diff(startTime, 'h', true)
+    if (job.date_completed) endTime = unix(job.date_completed.toMillis())
+    if (job.date_created) startTime = unix(job.date_created.toMillis())
+    if (endTime && startTime) totalTime = endTime.diff(startTime, 'h', true)
 
     return (
         <div className='is-atleast-fullheight is-flex' style={{ flexDirection: 'column' }}>
@@ -166,20 +161,20 @@ export function JobDetailTask({ job }: { job: IJobSample }) {
                         <tbody>
                             <tr>
                                 <td className=' has-text-right'>LOCATION</td>
-                                <td className=' has-text-left'>{job.location}</td>
+                                <td className=' has-text-left'>{job.location_address}</td>
                             </tr>
                             <tr>
                                 <td className=' has-text-right'>DESCRIPTION</td>
-                                <td className=' has-text-left'>{job.description}</td>
+                                <td className=' has-text-left'>{job.job_description}</td>
                             </tr>
                             <tr>
                                 <td className=' has-text-right'>PAY</td>
-                                <td className=' has-text-left'>{job.description}</td>
+                                <td className=' has-text-left'>{job.salary}</td>
                             </tr>
                             <tr>
                                 <td className=' has-text-right'>TASKS</td>
                                 <td className=' has-text-left'>
-                                    {job.tasks && job.tasks.length > 1 ? job.tasks?.map(task => <p>- {task}</p>) : `-`}
+                                    {job.tasks && job.tasks.length > 1 ? job.tasks?.map(task => <p>- {task.text}</p>) : `-`}
                                 </td>
                             </tr>
                             <tr>
@@ -188,11 +183,11 @@ export function JobDetailTask({ job }: { job: IJobSample }) {
                             </tr>
                             <tr>
                                 <td className=' has-text-right'>END</td>
-                                <td className=' has-text-left'>{endTime.calendar() || `-`}</td>
+                                <td className=' has-text-left'>{endTime?.calendar() || `-`}</td>
                             </tr>
                             <tr>
                                 <td className=' has-text-right'>TOTAL TIME</td>
-                                <td className=' has-text-left'>{totalTime.toFixed(2) || `-`}</td>
+                                <td className=' has-text-left'>{totalTime?.toFixed(2) || `-`}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -207,30 +202,30 @@ export function JobDetailTask({ job }: { job: IJobSample }) {
     )
 }
 
-export function JobDetailUser({ job }: { job: IJobSample }) {
+export function JobDetailUser({ job }: { job: IJob }) {
     let startTime
-    if (job.startTime) startTime = unix(job.startTime / 1000)
+    if (job.date_created) startTime = moment(job.date_created.toMillis() )
 
     return (
         <div className='container pt-4 pb-0 is-flex' style={{ flexDirection: 'column' }} >
             <div className='columns is-vcentered'>
                 <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                     <figure className='image is-80x80 is-flex'>
-                        <img className='is-rounded' src={job.user.profileImageURL} />
+                        <img className='is-rounded' src={job.user?.profileImageURL} />
                     </figure>
                 </div>
                 <div className='column'>
                     <div className='container'>
                         <div className='columns is-marginless is-vcentered is-mobile'>
                             <div className='column pb-0 pl-0'>
-                                <p className='is-size-5 has-text-left has-text-weight-bold'>{`${job.user.firstName} ${job.user.lastName}`}</p>
+                                <p className='is-size-5 has-text-left has-text-weight-bold'>{`${job.user?.firstName || "John"} ${job.user?.lastName ||'Doe'}`}</p>
                             </div>
                             <div className="column has-text-right pr-0 pb-0 is-size-6">View Profile</div>
                         </div>
                         <div className='content has-text-left'>
-                            <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user.starRate} &nbsp;{generateUserJobType(job.user)}</p>
-                            <p>{job.user.profileBio}</p>
-                            <p className='has-text-right'><span className='is-uppercase has-text-grey-light is-size-7'>member since</span> {job.user.dateCreated?.toDateString()}</p>
+                            <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user?.starRate} &nbsp;{generateUserJobType(DUMMY_USER)}</p>
+                            <p>{job.user?.profileBio}</p>
+                            <p className='has-text-right'><span className='is-uppercase has-text-grey-light is-size-7'>member since</span> {job.user?.dateCreated?.toDateString()}</p>
                         </div>
                     </div>
                 </div>
@@ -240,11 +235,11 @@ export function JobDetailUser({ job }: { job: IJobSample }) {
                     <tbody>
                         <tr>
                             <td className='has-text-right'>CONTACT</td>
-                            <td className='has-text-left'>{job.user.phoneNumber}</td>
+                            <td className='has-text-left'>{job.user?.phoneNumber}</td>
                         </tr>
                         <tr>
                             <td className='has-text-right'>ACTIVE TASK</td>
-                            <td className='has-text-left'>{job.user.activeTask}</td>
+                            <td className='has-text-left'>{job.user?.activeTask}</td>
                         </tr>
                         <tr>
                             <td className='has-text-right'>START TIME</td>
@@ -253,84 +248,13 @@ export function JobDetailUser({ job }: { job: IJobSample }) {
                         <tr>
                             <td className='has-text-right'>HIGHLIGHTE SKILLS AND LICENSES</td>
                             <td className='has-text-left'>
-                                {job.user.skills && job.user.skills.length > 1 ? job.user.skills?.map(task => <p>- {task}</p>) : `-`}
+                                {job.user?.skills && job.user.skills.length > 1 ? job.user.skills?.map(task => <p>- {task}</p>) : `-`}
                             </td>
 
                         </tr>
                     </tbody>
                 </table>
                 <button className='button is-info is-uppercase mx-4' style={{ alignSelf: 'flex-start' }}>Message</button>
-            </div>
-        </div>
-    )
-}
-
-export function JobList({ className }: { className?: string }) {
-    const ctx = useContext(APPLICATION_CONTEXT)
-    const [state, setState] = useState({ jobs: new Array<IJob>(), loading: false })
-
-    const { addToast } = useToasts()
-
-    useEffect(() => {
-        setState({ ...state, loading: true })
-        const unsubscribe = Job.listenForActiveJobs(async (err, docs: IJob[]) => {
-            if (err) {
-                setState({ ...state, loading: false })
-                return addToast(err.message || 'Failed to get jobs!')
-            }
-            docs = await Promise.all(
-                docs.map(async v => {
-                    v.user = DUMMY_USER
-                    console.log(v, 'fbase job')
-                    return v
-                })
-            )
-            setState({ ...state, jobs: docs, loading: false })
-        })
-
-        return unsubscribe
-    }, [])
-
-    return (
-        <div className={className}>
-            {state.loading ?
-                <progress className="progress is-small is-info my-6" max="100">loading</progress>
-                : state.jobs.map(j => (
-                    <Link key={j.id} to={`/${j.id}`} className='column is-4-fullhd is-6-desktop is-12-touch list-item' >
-                        <JobListItem job={j} />
-                    </Link>
-                ))}
-        </div>
-    )
-}
-
-export function JobSideList({ className, onCreateNew }) {
-    return (
-        <div className={`${className} panel job-panel has-background-white-ter is-flex`}>
-            <div className='panel-heading is-flex is-vcentered'>
-                <p className='has-text-left'>Job Listings</p>
-                <a className='button is-rounded' onClick={onCreateNew}><BsPencilSquare /></a>
-            </div>
-            <div className='panel-block'>
-                <div className='field has-addons' style={{ flex: 1 }}>
-                    <div className='control is-expanded has-icons-left'>
-                        <input style={{ borderRight: 0 }} className='input is-rounded' type='search' placeholder='Search Jobs...' />
-                        <span className='icon is-left'><FaSearch /></span>
-                    </div>
-                    <div className='control'>
-                        <button style={{ borderLeft: 0 }} className='button is-rounded'>
-                            <span className='icon is-right'><GoSettings onClick={() => window.alert("paparazi")} /></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div className='panel-tabs'>
-                <NavLink to={`${links.activeJobs}`} activeClassName='is-active'>Active</NavLink>
-                <NavLink to={`${links.inactiveJobs}`} activeClassName='is-active'>Inactive</NavLink>
-            </div>
-            <div className='has-background-white-ter' style={{ overflowY: 'auto', overflowX: 'hidden' }}>
-                <Route path={`${links.activeJobs}`} render={() => DUMMY_JOBS.map(j => <JobItem job={j} to={`${links.activeJobs}/${j.id}`} />)} />
-                <Route path={`${links.inactiveJobs}`} render={() => DUMMY_COMPLETED.map(j => <JobItem job={j} to={`${links.inactiveJobs}/${j.id}`} />)} />
             </div>
         </div>
     )
@@ -434,7 +358,7 @@ export const DUMMY_JOBS: IJobSample[] = [
     }
 ]
 
-const DUMMY_COMPLETED: IJobSample[] = [
+export const DUMMY_COMPLETED: IJobSample[] = [
     {
         description: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quam, nihil ipsam. Accusamus officiis aut velit voluptatum quis eligendi veniam nam.",
         title: "Lorem ipsum dolor sit.",

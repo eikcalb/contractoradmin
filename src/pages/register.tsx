@@ -1,13 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { NotificationList } from '../components/notification'
-import { PaymentList } from '../components/payment'
-import { CardFragment } from "../components/util";
-import { JobListItem, JobList, JobSideList, JobDetail, DUMMY_JOBS } from '../components/job';
-import { UserList } from '../components/user';
-import { CreateJob } from '../components/jobcreation';
+import React, { useContext, useEffect, useState } from 'react';
+import { RegisterView } from '../components/auth';
 import { AuthHandler } from '../components/guard';
 import { VIEW_CONTEXT } from '../lib';
-import { RegisterView } from '../components/auth';
 
 
 export function Register() {
@@ -32,7 +26,7 @@ export function Register() {
             viewCTX.showFooter(true)
             viewCTX.showToolbar(true)
         }
-    }, [])
+    })
 
     return (
         <AuthHandler>

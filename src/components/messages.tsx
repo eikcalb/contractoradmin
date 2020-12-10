@@ -53,12 +53,12 @@ export function MessageList({ onCreateNew = () => { }, className = '' }) {
             <div className='panel-block'>
                 <div className='field has-addons' style={{ flex: 1 }}>
                     <div className='control is-expanded has-icons-left'>
-                        <input style={{ borderRight: 0 }} className='input is-rounded' type='search' placeholder='Search Jobs...' />
+                        <input style={{ borderRight: 0 }} className='input is-rounded' type='search' placeholder='Search Messages...' />
                         <span className='icon is-left'><FaSearch /></span>
                     </div>
                     <div className='control'>
-                        <button style={{ borderLeft: 0 }} className='button is-rounded'>
-                            <span className='icon is-right'><GoSettings onClick={() => window.alert("paparazi")} /></span>
+                        <button style={{ borderLeft: 0 }} className='button is-rounded' onClick={() => window.alert("not ready yet")}>
+                            <span className='icon is-right'><GoSettings /></span>
                         </button>
                     </div>
                 </div>
@@ -96,10 +96,10 @@ export function MessageDetail({ message, className, contact }: { contact?: User,
                 <div className='container is-fluid px-0'>
                     <div className='columns is-fullheight mx-0 is-multiline'>
                         <div className='column is-8-fullhd is-7-desktop is-12 px-0'>
-                        
+
                         </div>
                         <div className='column is-4-fullhd is-5-desktop is-12 is-flex'>
-                        
+
                         </div>
                     </div>
                 </div>

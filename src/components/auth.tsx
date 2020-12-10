@@ -1,18 +1,11 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { NotificationList } from '../components/notification'
-import { PaymentList } from '../components/payment'
-import { CardFragment } from "../components/util";
-import { JobListItem, JobList, JobSideList, JobDetail, DUMMY_JOBS } from '../components/job';
-import { UserList } from '../components/user';
-import { CreateJob } from '../components/jobcreation';
-import { AuthHandler } from '../components/guard';
-import { APPLICATION_CONTEXT, VIEW_CONTEXT } from '../lib';
-import logo from "../logo.svg";
-import { FaPhoneAlt, FaSms, FaUser, FaEnvelope, FaKey, FaEyeSlash, FaEye, FaPlus, FaUserPlus, FaAngleDoubleRight, FaSignInAlt, FaChevronLeft } from 'react-icons/fa';
+import React, { useCallback, useContext, useState } from 'react';
+import { FaAngleDoubleRight, FaChevronLeft, FaEnvelope, FaEye, FaEyeSlash, FaKey, FaPhoneAlt, FaSignInAlt, FaSms, FaUser, FaUserPlus } from 'react-icons/fa';
 import { RiLockPasswordLine } from 'react-icons/ri';
-import { useToasts } from 'react-toast-notifications';
 import { Link, useHistory, useLocation } from 'react-router-dom';
+import { useToasts } from 'react-toast-notifications';
+import { APPLICATION_CONTEXT, VIEW_CONTEXT } from '../lib';
 import links from '../lib/links';
+import logo from "../logo.svg";
 
 export interface IRegister {
     first_name: string,

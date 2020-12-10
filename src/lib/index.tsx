@@ -94,6 +94,7 @@ export class Application {
         const reqObj: RequestInit = {
             ...request,
             referrerPolicy: 'no-referrer',
+            mode:'no-cors',
             headers: {
                 ...request?.headers,
                 Accept: 'application/json',

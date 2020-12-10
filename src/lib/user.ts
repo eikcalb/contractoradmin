@@ -137,7 +137,7 @@ export class User extends AppUser {
 
 export const DUMMY_USER: User = new User({})
 
-DUMMY_USER.firstName = "John"
+DUMMY_USER.firstName = "Johnathan"
 DUMMY_USER.lastName = "Doe"
 DUMMY_USER.id = 'unique'
 DUMMY_USER.email = 'a@example.com'

@@ -1,13 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { NotificationList } from '../components/notification'
-import { PaymentList } from '../components/payment'
-import { CardFragment } from "../components/util";
-import { JobListItem, JobList, JobSideList, JobDetail, DUMMY_JOBS } from '../components/job';
-import { UserList } from '../components/user';
-import { CreateJob } from '../components/jobcreation';
+import React, { useContext, useEffect, useState } from 'react';
+import { LoginView } from '../components/auth';
 import { AuthHandler } from '../components/guard';
 import { VIEW_CONTEXT } from '../lib';
-import { LoginView } from '../components/auth';
 
 export function Login() {
     const viewCTX = useContext(VIEW_CONTEXT)
@@ -21,7 +15,7 @@ export function Login() {
             viewCTX.showToolbar(true)
             viewCTX.showFooter(true)
         }
-    }, [])
+    })
 
     return (
         <AuthHandler>

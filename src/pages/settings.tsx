@@ -2,7 +2,9 @@ import React, { useState, useContext } from 'react'
 import { NotificationList } from '../components/notification'
 import { PaymentList } from '../components/payment'
 import { CardFragment } from "../components/util";
-import { JobListItem, JobList, JobSideList, JobDetail, DUMMY_JOBS } from '../components/job';
+import { JobListItem, JobDetail, DUMMY_JOBS } from '../components/job';
+import { JobSideList } from "../components/JobSideList";
+import { JobList } from "../components/JobList";
 import { UserList } from '../components/user';
 import { CreateJob } from '../components/jobcreation';
 import { NavLink, Route, Switch, Link } from 'react-router-dom';

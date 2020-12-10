@@ -1,13 +1,18 @@
 export default {
-    register:'/register',
-    login:'/login',
+    register: '/register',
+    login: '/login',
     messages: '/messages',
+    _messages: '/messages/:id?',
     home: '/',
     dashboard: '/dashboard',
     invoices: '/invoices',
     jobs: '/jobs',
     activeJobs: '/jobs/active',
     inactiveJobs: '/jobs/inactive',
+    _jobItem: {
+        active: '/jobs/active/:id?',
+        inactive: '/jobs/inactive/:id?'
+    },
     privacyPolicy: '/privacyPolicy',
     termsOfService: '/terms',
     profile: '/profile',

@@ -1,10 +1,9 @@
-import React from 'react'
-import { NotificationList } from '../components/notification'
-import { PaymentList } from '../components/payment'
-import { CardFragment } from "../components/util";
-import { JobListItem, JobList } from '../components/job';
+import React from 'react';
+import { JobList } from "../components/JobList";
+import { NotificationList } from '../components/notification';
+import { PaymentList } from '../components/payment';
 import { UserList } from '../components/user';
-import { CreateJob } from '../components/jobcreation';
+import { CardFragment } from "../components/util";
 
 export function Dashboard() {
     return (
