@@ -79,7 +79,14 @@ export function Jobs() {
     return (
         <div className='columns is-gapless px-4 py-4 is-fullheight is-multiline'>
             <JobSideList activeJobs={active} inactiveJobs={inactive} onCreateNew={() => setState({ ...state, showModal: true })} className='column is-3 is-12-touch is-clipped is-fullheight' />
-            <JobDetail job={state.selected} className='column is-9 is-12-touch is-flex' />
+            <JobDetail onCancel={(job: IJob) => {
+                if (job.status === 'complete') {
+                    setInactive(inactive.filter(v => v.id !== job.id))
+                } else {
+                    setActive(active.filter(v => v.id !== job.id))
+                }
+                setState({ ...state, selected: null })
+            }} job={state.selected} className='column is-9 is-12-touch is-flex' />
             {state.showModal ?
                 <CreateJob show={state.showModal} onClose={() => setState({ ...state, showModal: false })} onComplete={() => {
                     setState({ ...state, showModal: false })

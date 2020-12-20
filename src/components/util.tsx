@@ -48,3 +48,9 @@ export function debounce(func, wait: number, immediate: boolean = false) {
         if (callNow) return func(...args)
     };
 };
+
+export async function wait(duration = 5000) {
+    await new Promise((res) => {
+        setTimeout(res, duration)
+    })
+}

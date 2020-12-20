@@ -1,12 +1,14 @@
 import moment, { unix } from 'moment'
-import React from 'react'
+import React, { useCallback, useState } from 'react'
 import { FaExpandAlt, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat } from 'react-icons/fa'
 import { GrUserWorker } from "react-icons/gr";
 import { NavLink } from 'react-router-dom'
 import { STYLES } from '../lib/theme'
 import { DUMMY_USER, User } from '../lib/user'
-import { IJob } from '../lib/job'
+import { IJob, Job } from '../lib/job'
 import firebase from "firebase";
+import { useToasts } from 'react-toast-notifications';
+import { wait } from './util';
 
 export function JobListItem({ job }: { job: IJob }) {
     const time = moment(job.date_created.toDate())
@@ -81,7 +83,7 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
                             </figure>
                         </div>
                         <div className='column is-narrow'>
-                            <div className='title is-6'>{`${job.user?.firstName||'John'} ${job.user?.lastName||"Doe"}`}</div>
+                            <div className='title is-6'>{`${job.user?.firstName || 'John'} ${job.user?.lastName || "Doe"}`}</div>
                         </div>
                         <div className='column has-text-right'>
                             {time.calendar()}
@@ -105,7 +107,7 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
     )
 }
 
-export function JobDetail({ job, className }: { job: IJob | null, className?: string }) {
+export function JobDetail({ job, className, onCancel }: { onCancel: (job: IJob) => any, job: IJob | null, className?: string }) {
     if (!job) {
         return (
             <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
@@ -129,7 +131,7 @@ export function JobDetail({ job, className }: { job: IJob | null, className?: st
                 <div className='container is-fluid px-0'>
                     <div className='columns is-fullheight mx-0 is-multiline'>
                         <div className='column is-8-fullhd is-7-desktop is-12 px-0'>
-                            <JobDetailTask job={job} />
+                            <JobDetailTask onJobCancel={onCancel} job={job} />
                         </div>
                         <div className='column is-4-fullhd is-5-desktop is-12 is-flex'>
                             <JobDetailUser job={job} />
@@ -141,11 +143,32 @@ export function JobDetail({ job, className }: { job: IJob | null, className?: st
     )
 }
 
-export function JobDetailTask({ job }: { job: IJob }) {
+export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) {
+    const [state, setState] = useState({ loadingCancel: false })
+    const { addToast } = useToasts()
+
     let endTime, startTime, totalTime
     if (job.date_completed) endTime = unix(job.date_completed.toMillis())
     if (job.date_created) startTime = unix(job.date_created.toMillis())
     if (endTime && startTime) totalTime = endTime.diff(startTime, 'h', true)
+
+    const onCancel = useCallback(async () => {
+        try {
+            const confirmed = window.confirm("Are you sure you want to cancel this job?")
+            if (!confirmed) {
+                return
+            }
+
+            setState({ ...state, loadingCancel: true })
+            await Job.cancelJob(job)
+            addToast('Cancelled job successfully!', { appearance: 'success' })
+            onJobCancel(job)
+        } catch (e) {
+            addToast(e.message || 'Failed to cancel job!', { appearance: 'error' })
+        } finally {
+            setState({ ...state, loadingCancel: false })
+        }
+    }, [job, state])
 
     return (
         <div className='is-atleast-fullheight is-flex' style={{ flexDirection: 'column' }}>
@@ -195,7 +218,7 @@ export function JobDetailTask({ job }: { job: IJob }) {
                 {job.progress && job.progress >= 100 ? (
                     <button className='button is-info is-uppercase mx-4' style={{ alignSelf: 'flex-end' }}>View Invoice</button>
                 ) :
-                    <button className='button is-white is-uppercase is-inverted mx-4' style={{ alignSelf: 'flex-start' }}>Cancel Job</button>
+                    <button disabled={state.loadingCancel} onClick={onCancel} className={`button is-white is-uppercase is-inverted mx-4 ${state.loadingCancel ? 'is-loading' : ''}`} style={{ alignSelf: 'flex-start', color: 'white' }}>Cancel Job</button>
                 }
             </div>
         </div >
@@ -204,7 +227,7 @@ export function JobDetailTask({ job }: { job: IJob }) {
 
 export function JobDetailUser({ job }: { job: IJob }) {
     let startTime
-    if (job.date_created) startTime = moment(job.date_created.toMillis() )
+    if (job.date_created) startTime = moment(job.date_created.toMillis())
 
     return (
         <div className='container pt-4 pb-0 is-flex' style={{ flexDirection: 'column' }} >
@@ -218,7 +241,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                     <div className='container'>
                         <div className='columns is-marginless is-vcentered is-mobile'>
                             <div className='column pb-0 pl-0'>
-                                <p className='is-size-5 has-text-left has-text-weight-bold'>{`${job.user?.firstName || "John"} ${job.user?.lastName ||'Doe'}`}</p>
+                                <p className='is-size-5 has-text-left has-text-weight-bold'>{`${job.user?.firstName || "John"} ${job.user?.lastName || 'Doe'}`}</p>
                             </div>
                             <div className="column has-text-right pr-0 pb-0 is-size-6">View Profile</div>
                         </div>

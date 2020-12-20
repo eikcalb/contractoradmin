@@ -34,7 +34,7 @@ export interface IJob {
     tasks: { id: string, text: string }[]
     wage: "hr"
     required_count: number
-    progress?:number
+    progress?: number
     user?: User
 }
 
@@ -98,10 +98,18 @@ export class Job {
         return newDoc.set(job)
     }
 
+    static async cancelJob(job: IJob) {
+        if (job.status === 'complete') {
+            throw new Error('You cannot cancel a completed job!')
+        }
+        await Job.db.doc(job.id).delete()
+        return true
+    }
+
     static async getInactiveJobs(limit = 20) {
         return Job.db.where('status', '==', "complete").native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
             const jobs: IJob[] = []
-            snap.forEach( doc => {
+            snap.forEach(doc => {
                 const item: any = doc.data()
                 item.id = doc.id
                 jobs.push(item)

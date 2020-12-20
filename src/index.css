@@ -18,3 +18,7 @@ html {
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
+
+.button.is-white.is-loading::after {
+    border-color: transparent transparent #fff #fff!important;
+}
