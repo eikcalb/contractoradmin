@@ -13,9 +13,6 @@ export function Dashboard() {
                 <CardFragment header='Active Jobs' optionsText={'View All'} style={{ marginBottom: '0.8em', flexGrow: 2 }}>
                     <JobList className={'columns is-multiline is-1 is-variable'} />
                 </CardFragment>
-                <CardFragment header='Recently Hired' optionsText={'View All'} style={{ flexGrow: 1 }}>
-                    <UserList className={'columns is-multiline is-1 is-variable'} />
-                </CardFragment>
             </div>
             <PaymentList className='column is-3 is-2-widescreen' />
         </div>

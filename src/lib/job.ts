@@ -168,4 +168,8 @@ export class Job {
 
         return unsubscribe
     }
+
+    static getJobPhotoURL(app: Application, job: IJob) {
+        return `${app.config.hostname}/images/${job.posted_by}.jpg`
+    }
 }

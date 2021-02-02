@@ -71,8 +71,8 @@ function App() {
                 }} path={links.jobs} exact />
                 <Route component={Jobs} path={links._jobItem.active} />
                 <AuthGuard component={Jobs} path={links._jobItem.inactive} />
-                <Route component={Messages} path={links._messages} />
-                <AuthGuard component={Dashboard} path={links.dashboard} exact />
+                <AuthGuard component={Messages} path={links._messages} />
+                <Route component={Dashboard} path={links.dashboard} exact />
 
                 <Route path={links.home} strict={false} exact={true}>
                   {ctx.signedIn() && viewContext.signedIn ? <Redirect to={links.dashboard} /> : <Redirect to={links.login} />}

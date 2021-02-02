@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { NotificationList } from '../components/notification'
 import { PaymentList } from '../components/payment'
-import { CardFragment } from "../components/util";
+import { CardFragment, useEscapeHandler } from "../components/util";
 import { JobListItem, JobDetail, DUMMY_JOBS } from '../components/job';
 import { JobSideList } from "../components/JobSideList";
 import { JobList } from "../components/JobList";
@@ -19,6 +19,12 @@ export function Jobs() {
     const [inactive, setInactive] = useState([] as IJob[])
     const { addToast } = useToasts()
     const location = useLocation()
+
+    const removeEscapeHandler = useEscapeHandler(() => setState({ ...state, showModal: false }))
+
+    useEffect(() => {
+        return removeEscapeHandler()
+    }, [])
 
     useEffect(() => {
         setState({ ...state, loading: true });
@@ -64,14 +70,10 @@ export function Jobs() {
             if (activeMatch) {
                 const selected = active.find(v => v.id === id)
                 console.log(id, 'active: ', activeMatch, inactiveMatch, 'selected: ', selected)
-                if (selected) {
-                    setState({ ...state, selected })
-                }
+                setState({ ...state, selected: selected || null })
             } else if (inactiveMatch) {
                 const selected = inactive.find(v => v.id === id)
-                if (selected) {
-                    setState({ ...state, selected })
-                }
+                setState({ ...state, selected: selected || null })
             }
         }
     }, [location, active, inactive])
@@ -86,7 +88,8 @@ export function Jobs() {
                     setActive(active.filter(v => v.id !== job.id))
                 }
                 setState({ ...state, selected: null })
-            }} job={state.selected} className='column is-9 is-12-touch is-flex' />
+            }}
+                job={id ? state.selected : null} className='column is-9 is-12-touch is-flex' />
             {state.showModal ?
                 <CreateJob show={state.showModal} onClose={() => setState({ ...state, showModal: false })} onComplete={() => {
                     setState({ ...state, showModal: false })

@@ -22,7 +22,6 @@ export function JobList({ className }: { className?: string; }) {
             docs = await Promise.all(
                 docs.map(async (v) => {
                     v.user = DUMMY_USER;
-                    console.log(v, 'fbase job');
                     return v;
                 })
             );

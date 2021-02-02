@@ -1,5 +1,5 @@
 import moment, { unix } from 'moment'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useState, useContext } from 'react'
 import { FaExpandAlt, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat } from 'react-icons/fa'
 import { GrUserWorker } from "react-icons/gr";
 import { NavLink } from 'react-router-dom'
@@ -9,8 +9,11 @@ import { IJob, Job } from '../lib/job'
 import firebase from "firebase";
 import { useToasts } from 'react-toast-notifications';
 import { wait } from './util';
+import { APPLICATION_CONTEXT } from '../lib';
 
 export function JobListItem({ job }: { job: IJob }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
+
     const time = moment(job.date_created.toDate())
     return (
         <div className='card'>
@@ -37,7 +40,7 @@ export function JobListItem({ job }: { job: IJob }) {
                             <div className='columns is-vcentered is-mobile'>
                                 <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                                     <figure className='image is-flex is-32x32'>
-                                        <img className='is-rounded' src={job.user?.profileImageURL} />
+                                        <img className='is-rounded' src={Job.getJobPhotoURL(ctx, job)} />
                                     </figure>
                                 </div>
                                 <div className='column is-narrow'>
@@ -60,6 +63,8 @@ export function JobListItem({ job }: { job: IJob }) {
 }
 
 export function JobItem({ job, to }: { job: IJob, to: any }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
+
     const time = moment(job.date_created.toMillis())
     let endTime
     if (job.date_completed) endTime = moment(job.date_completed.toMillis())
@@ -78,8 +83,8 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
                     </div>
                     <div className='columns is-vcentered is-mobile'>
                         <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
-                            <figure className='image is-flex is-32x32'>
-                                <img className='is-rounded' src={job.user?.profileImageURL} />
+                            <figure className='image is-flex is-48x48'>
+                                <img className='is-rounded' src={Job.getJobPhotoURL(ctx, job)} />
                             </figure>
                         </div>
                         <div className='column is-narrow'>
@@ -148,8 +153,8 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
     const { addToast } = useToasts()
 
     let endTime, startTime, totalTime
-    if (job.date_completed) endTime = unix(job.date_completed.toMillis())
-    if (job.date_created) startTime = unix(job.date_created.toMillis())
+    if (job.date_completed) endTime = unix(job.date_completed.toMillis() / 1000)
+    if (job.date_created) startTime = unix(job.date_created.toMillis() / 1000)
     if (endTime && startTime) totalTime = endTime.diff(startTime, 'h', true)
 
     const onCancel = useCallback(async () => {
@@ -192,7 +197,7 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
                             </tr>
                             <tr>
                                 <td className=' has-text-right'>PAY</td>
-                                <td className=' has-text-left'>{job.salary}</td>
+                                <td className=' has-text-left'>{job.salary} <span className='has-text-grey is-size-7'>/{job.wage}</span></td>
                             </tr>
                             <tr>
                                 <td className=' has-text-right'>TASKS</td>
@@ -226,6 +231,8 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
 }
 
 export function JobDetailUser({ job }: { job: IJob }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
+
     let startTime
     if (job.date_created) startTime = moment(job.date_created.toMillis())
 
@@ -234,7 +241,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
             <div className='columns is-vcentered'>
                 <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                     <figure className='image is-80x80 is-flex'>
-                        <img className='is-rounded' src={job.user?.profileImageURL} />
+                        <img className='is-rounded' src={Job.getJobPhotoURL(ctx, job)} />
                     </figure>
                 </div>
                 <div className='column'>
@@ -260,10 +267,10 @@ export function JobDetailUser({ job }: { job: IJob }) {
                             <td className='has-text-right'>CONTACT</td>
                             <td className='has-text-left'>{job.user?.phoneNumber}</td>
                         </tr>
-                        <tr>
+                        {/* <tr>
                             <td className='has-text-right'>ACTIVE TASK</td>
                             <td className='has-text-left'>{job.user?.activeTask}</td>
-                        </tr>
+                        </tr> */}
                         <tr>
                             <td className='has-text-right'>START TIME</td>
                             <td className='has-text-left'>{startTime.calendar()}</td>

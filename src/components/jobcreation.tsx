@@ -1,6 +1,6 @@
 import Tags from "@yaireo/tagify/dist/react.tagify";
-import React, { useState, useCallback, useMemo, useContext, useEffect, useLayoutEffect, createRef, Ref } from 'react';
-import { FaChevronLeft, FaMapMarkerAlt, FaSearch } from 'react-icons/fa';
+import React, { useState, useCallback, useMemo, useContext, useEffect, useLayoutEffect, createRef, Ref, useRef } from 'react';
+import { FaChevronLeft, FaMapMarkerAlt, FaSearch, FaUpload } from 'react-icons/fa';
 import { useToasts } from 'react-toast-notifications';
 import { debounce } from "./util";
 import { Job, IJob } from "../lib/job";
@@ -115,6 +115,53 @@ export function FormField({ label, value, onChange, className, type, placeholder
     )
 }
 
+export function FileInput({ disabled, value, onChange, onRemovePhoto }) {
+    const ref = useRef<HTMLInputElement>(null)
+
+    return (
+        <div className='field job-form-field has-text-left my-4'>
+            <label className='label is-flex' style={{ justifyContent: 'space-between' }}><span>Job Photos</span> <span className='has-text-right has-text-weight-normal is-size-7'>Add photos to help describe this job</span></label>
+            <div className='control is-expanded'>
+                <div className='file is-flex is-centered is-normal'>
+                    <label className='file-label is-flex-grow-1'>
+                        <input onChange={(el) => {
+                            if (el.target.files) {
+                                const files: File[] = []
+                                for (let i = 0; i < el.target.files?.length; i++) {
+                                    files.push(el.target.files[i])
+                                }
+                                if (files.length > 0) {
+                                    onChange(files)
+                                }
+                            }
+                        }} className='file-input' multiple ref={ref} disabled={disabled} type='file' accept='image/*' />
+                        <span className='file-cta is-flex is-flex-centered' style={{ width: '100%' }}>
+                            <span className='file-icon'>
+                                <FaUpload />
+                            </span>
+                            <span className='file-label'>
+                                SELECT PHOTOS
+                            </span>
+                        </span>
+                    </label>
+                </div>
+                {value && value.length > 0 ?
+                    <div className='field is-grouped is-grouped-multiline'>
+                        {value.map((file: File, index) =>
+                            <div className='control mr-2 my-2 '>
+                                <div className='tags has-addons'>
+                                    <span key={`${file.name}-${file.size}-${index}`} className='tag is-dark'>{file.name}</span>
+                                    <button onClick={() => { onRemovePhoto(index) }} className='tag is-delete'></button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    : null}
+            </div>
+        </div>
+    )
+}
+
 export function CreateJob({ onClose, show, onComplete }) {
     const ctx = useContext(APPLICATION_CONTEXT)
     const [state, setState] = useState({
@@ -131,6 +178,7 @@ export function CreateJob({ onClose, show, onComplete }) {
         manualAddress: false,
         location: null as any,
     })
+    const [photos, setPhotos] = useState([] as File[])
     const { addToast } = useToasts()
     const types = useMemo(() => {
         return {
@@ -290,6 +338,8 @@ export function CreateJob({ onClose, show, onComplete }) {
                                         )}
                                     />
                                     <FormField required disabled={state.loading} value={state.tasks} tags onChange={(tasks) => setState((state) => ({ ...state, tasks }))} isTextArea className='' containerClassName='my-4' label="Tasks" placeholder='Add a task' type='text' icon={null} helpTextTop='Provide each task required to be completed for this listing' helpTextRight='Separate each task with a comma (,)' />
+
+                                    <FileInput disabled={state.loading} value={photos} onRemovePhoto={(i) => { setPhotos(photos.filter((_, index) => index !== i)) }} onChange={(photos) => setPhotos(photos)} />
                                 </div>
                             </div>
                         </div>

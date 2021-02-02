@@ -54,3 +54,13 @@ export async function wait(duration = 5000) {
         setTimeout(res, duration)
     })
 }
+
+export const useEscapeHandler = (callback: any) => {
+    const handler = (ev: KeyboardEvent) => {
+        if (ev.key === 'Escape') {
+            callback()
+        }
+    }
+    window.document.addEventListener('keydown', handler)
+    return () => window.document.removeEventListener('keydown', handler)
+}

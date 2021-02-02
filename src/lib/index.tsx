@@ -4,6 +4,7 @@ import { IRegister } from "../components/auth"
 import CONFIG from "./config"
 import { initializeStorage, KEYS, localforage } from "./storage"
 import { DUMMY_USER, User } from "./user"
+import { Message } from "./message";
 
 interface ISettings {
     lastUserName: string
@@ -94,7 +95,7 @@ export class Application {
         const reqObj: RequestInit = {
             ...request,
             referrerPolicy: 'no-referrer',
-            mode:'no-cors',
+            mode: 'no-cors',
             headers: {
                 ...request?.headers,
                 Accept: 'application/json',
@@ -314,6 +315,7 @@ export class Application {
 
 
     async logout() {
+        new Message()
         this.user = undefined
         await localforage.removeItem(KEYS.USER_SESSION)
         //await localforage.removeItem(KEYS.REFRESH_TOKEN)
