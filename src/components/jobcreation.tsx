@@ -257,7 +257,8 @@ export function CreateJob({ onClose, show, onComplete }) {
                     // Add to the list of job types.
                     await Job.addJobType(ctx, newJob.job_type)
                 }
-                await Job.addNewJob(ctx, newJob)
+
+                await Job.addNewJob(ctx, newJob, photos)
                 setState({ ...state, loading: false })
                 addToast("Successfully added job!", { appearance: 'success' })
                 onComplete()
@@ -295,7 +296,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                                     <FormField required disabled={state.loading || state.fetchingLocation} value={state.address} tagifyRef={tagifyRef2} tags={!state.manualAddress} whitelist={types.location} onChange={(address) => setState((state) => ({ ...state, address }))} className='' containerClassName='my-4' label="Location Address" placeholder='Begin typing the first line of the address' type='text' icon={<FaMapMarkerAlt />}
                                         hasAddons addon={(
                                             <div className='control'>
-                                                <button disabled={state.loading || state.fetchingLocation} className={`button ${state.fetchingLocation ? 'is-loading' : ''} ${state.manualAddress ? 'is-info has-text-white' : ''}`} onClick={async () => {
+                                                <button disabled={state.loading || state.fetchingLocation} className={`button has-background-white ${state.fetchingLocation ? 'is-loading' : ''} ${state.manualAddress ? 'is-info has-text-white' : ''}`} onClick={async () => {
                                                     const manualAddress = !state.manualAddress
                                                     if (manualAddress) {
                                                         setState({ ...state, fetchingLocation: true })
@@ -311,7 +312,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                                                     } else {
                                                         setState((state) => ({ ...state, location: null, manualAddress }))
                                                     }
-                                                }} type='button' style={{ color: 'black', borderLeft: 0, zIndex: 4 }}><span className='is-size-7'>or enter the address manually</span></button>
+                                                }} type='button' style={{ color: 'black', borderLeft: 0, zIndex: 4 }}><span className='is-size-7'>or use current location</span></button>
                                             </div>
                                         )}
                                     />
@@ -333,7 +334,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                                         icon={null}
                                         addon={(
                                             <div className='control'>
-                                                <button className='button' disabled style={{ color: 'black', borderLeft: 0 }}>Per Hour</button>
+                                                <button className='button' disabled style={{ color: 'black', borderLeft: 0 }}>Per Deployment</button>
                                             </div>
                                         )}
                                     />

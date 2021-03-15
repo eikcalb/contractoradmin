@@ -1,17 +1,18 @@
-import React from 'react'
-import { FaSearch, FaMapMarkerAlt, FaCheckSquare, FaCheck } from 'react-icons/fa'
+import React, { useState } from 'react'
+import { FaSearch, FaMapMarkerAlt, FaCheckSquare, FaCheck, FaCaretUp, FaCaretDown } from 'react-icons/fa'
 import moment from "moment";
 import { Link, NavLink } from 'react-router-dom';
+import { Empty } from './util';
 
 export function NotificationItem({ notification }: { notification: INotification }) {
     const time = moment.unix(notification.timestamp / 1000)
     return (
         <div className='container is-fluid is-paddingless list-item py-2' title={notification.title}>
             <div className='columns is-variable is-1 py-1 px-1 is-vcentered'>
-                <div className='column is-paddingless is-6 has-text-left list-item-title'>
+                <div className='column is-paddingless is-6 has-text-left has-text-centered-mobile  list-item-title'>
                     <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{getNotificationIcon(notification)} {notification.title}</p>
                 </div>
-                <div className='column is-paddingless has-text-right has-text-left-mobile list-item-subtitle'>
+                <div className='column is-paddingless has-text-right has-text-centered-mobile list-item-subtitle'>
                     <p style={{ maxLines: 2 }}>{time.fromNow()}</p>
                 </div>
             </div>
@@ -36,17 +37,31 @@ export function getNotificationIcon(notif: INotification) {
 }
 
 export function NotificationList({ className }) {
+    const [expanded, setExpanded] = useState(true)
+
     return (
         <nav className={className}>
-            <div className='panel'>
-                <div className={'panel-heading has-text-left has-background-white-bis'}>
+            <div className='panel is-clipped' >
+                <div onClick={() => setExpanded(!expanded)} className='panel-heading has-text-left has-background-white-bis is-align-items-center is-flex is-flex-direction-row is-justify-content-space-between'>
                     <p>Notifications</p>
+                    <button className='button is-static has-background-white is-rounded is-small'>
+                        {!expanded ?
+                            <FaCaretUp size={16} className={`icon has-text-black is-small`} />
+                            :
+                            <FaCaretDown size={16} className={`icon has-text-black is-small`} />}
+                    </button>
                 </div>
-                {DUMMY_NOTIFICATIONS.map(n => (
-                    <Link key={n.id} to={`/f`} className='panel-block'>
-                        <NotificationItem notification={n} />
-                    </Link>
-                ))}
+                <div style={{ transition: "all 0.500s linear" }} className={`${!expanded ? 'is-height-0' : ''}`}>
+                    {DUMMY_NOTIFICATIONS.length > 0 ?
+                        DUMMY_NOTIFICATIONS.map(n => (
+                            <Link key={n.id} to={`/f`} className='panel-block'>
+                                <NotificationItem notification={n} />
+                            </Link>
+                        ))
+                        :
+                        <Empty text='No Notification available' />
+                    }
+                </div>
             </div>
         </nav>
     )

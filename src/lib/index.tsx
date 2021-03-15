@@ -95,7 +95,7 @@ export class Application {
         const reqObj: RequestInit = {
             ...request,
             referrerPolicy: 'no-referrer',
-            mode: 'no-cors',
+            mode: 'cors',
             headers: {
                 ...request?.headers,
                 Accept: 'application/json',
@@ -165,6 +165,7 @@ export class Application {
         const response = await this.initiateNetworkRequest(`/users/phone/${encodeURIComponent(phone)}`, {
             method: 'GET',
         })
+
         if (!response.ok) {
             throw new Error((await response.json())?.message || "Verification failed!")
         }
@@ -224,7 +225,8 @@ export class Application {
             }
             this.user = await User.getUser(this, jsonResponse.userName, jsonResponse.token)
             if (this.user.role !== 'admin') {
-                throw new Error("Authenticated access only allowed for administrators!")
+                // TODO: Decide the kind of users that can access this webapp
+                // throw new Error("Authenticated access only allowed for administrators!")
             }
 
             await this.persistUser()

@@ -11,6 +11,10 @@
     flex: 1;
 }
 
+.is-height-0 {
+    height: 0
+}
+
 .is-flex-centered {
     display: flex!important;
     justify-content: center;
@@ -136,6 +140,9 @@
 @media screen and (max-width:1023px) {
     .job-detail {
         border-radius: 0 0 1em 1em;
+    }
+    .job-panel.panel {
+        margin-bottom: 8em!important;
     }
 }
 

@@ -2,7 +2,7 @@ import { IJobHistory } from "./job";
 import { IEducationHistory, ILicense } from "./education";
 import { Application } from ".";
 
-export const DUMMY_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEyMzQ1NiwiZW1haWwiOiJ6ekBnbWFpbC5jb20iLCJwaG9uZV9udW1iZXIiOiIrMjM0ODA4MzgyMTc4MiIsImp0aSI6ImEyZjI5YzU3LTliZTQtNDBlYi1hOGQ2LTJjMTYxNjNkYTk5YSIsImlhdCI6MTYwMjQxNjg4NSwiZXhwIjoxNjAyNDIwNDg1fQ.ReW81UZOLp2tv1TWpTZ-SiBcCqsZzMHg4tsYehzk4KA"
+export const DUMMY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZjdlMDFmOTBiMjRmNzAwMTcyZmRkOTQiLCJlbWFpbCI6Inp6QGdtYWlsLmNvbSIsInBob25lX251bWJlciI6IisyMzQ4MDgzODIxNzgyIiwiaWF0IjoxNjE1NjYzNDQ4fQ.nHEwobqCa4yT1z27ydwpSHPg_6s4CEp1QarlJGU1HUo"
 export const DUMMY_TOKEN_SECRET = "secret"
 
 class AppUser {

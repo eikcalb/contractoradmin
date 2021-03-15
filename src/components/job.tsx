@@ -70,7 +70,7 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
     if (job.date_completed) endTime = moment(job.date_completed.toMillis())
 
     return (
-        <NavLink activeClassName="is-active" to={to} className={`job-item mb-8 is-block card is-shadowless has-background-white-ter`}>
+        <NavLink activeClassName="is-active" to={to} style={{ overflowX: 'auto' }} className={`job-item mb-8 is-block card is-shadowless has-background-white-ter`}>
             <div className='card-content'>
                 <div className='container is-paddingless'>
                     <div className='columns'>
@@ -131,14 +131,14 @@ export function JobDetail({ job, className, onCancel }: { onCancel: (job: IJob) 
                 <div className='level py-4 mb-0'>
                     <div className='level-item is-size-6'>POSTED {time.calendar()}</div>
                     <div className='level-item is-size-4 has-text-weight-bold'>{job.job_title}</div>
-                    <div className='level-item is-size-6'>{job.id}</div>
+                    <div className='level-item is-size-6 has-text-grey'>{job.id}</div>
                 </div>
                 <div className='container is-fluid px-0'>
-                    <div className='columns is-fullheight mx-0 is-multiline'>
-                        <div className='column is-8-fullhd is-7-desktop is-12 px-0'>
+                    <div className='columns is-fullheight mx-0 my-0 is-multiline'>
+                        <div className='column is-8-fullhd is-7-desktop is-12 px-0 pt-0'>
                             <JobDetailTask onJobCancel={onCancel} job={job} />
                         </div>
-                        <div className='column is-4-fullhd is-5-desktop is-12 is-flex'>
+                        <div style={{borderLeft:'solid 1px #8881'}} className='column is-4-fullhd is-5-desktop is-12 is-flex'>
                             <JobDetailUser job={job} />
                         </div>
                     </div>
@@ -276,7 +276,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                             <td className='has-text-left'>{startTime.calendar()}</td>
                         </tr>
                         <tr>
-                            <td className='has-text-right'>HIGHLIGHTE SKILLS AND LICENSES</td>
+                            <td className='has-text-right'>HIGHLIGHTED SKILLS AND LICENSES</td>
                             <td className='has-text-left'>
                                 {job.user?.skills && job.user.skills.length > 1 ? job.user.skills?.map(task => <p>- {task}</p>) : `-`}
                             </td>

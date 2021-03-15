@@ -74,7 +74,7 @@ export class Job {
         })
     }
 
-    static async addNewJob(app: Application, job) {
+    static async addNewJob(app: Application, job, photos: File[] = []) {
         if (!job.posted_by || !job.job_title || !job.salary || !job.wage || !job.location || !job.location_address) {
             throw new Error('Complete all required fields to continue!')
         }
@@ -94,8 +94,31 @@ export class Job {
         job.coordinates = new firebase.firestore.GeoPoint(job.location.coords.latitude, job.location.coords.longitude)
 
         const newDoc = Job.db.doc()
+        let photo_files
+
+        if (photos && photos.length > 0) {
+            // If photo is selected, add the photo
+            const body = new FormData()
+            photos.map((photo) => {
+                body.append("photo", photo);
+            })
+            const apiResponse = await app.initiateNetworkRequest(`/job/upload`, {
+                method: "POST",
+                headers: {
+                    "x-job-id": newDoc.id,
+                },
+                body,
+            }, true)
+
+            if (!apiResponse.ok) {
+                throw new Error((await apiResponse.json()).message || "Failed to upload job");
+            }
+
+            photo_files = (await apiResponse.json()).data;
+        }
+
         job.id = newDoc.id
-        return newDoc.set(job)
+        return newDoc.set({ ...job, photo_files })
     }
 
     static async cancelJob(job: IJob) {
@@ -118,8 +141,8 @@ export class Job {
         })
     }
 
-    static async getActiveJobs() {
-        return Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(6).get().then(async snap => {
+    static async getActiveJobs(limit = 20) {
+        return Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(20).get().then(async snap => {
             const jobs: IJob[] = []
             snap.forEach(async doc => {
                 const item: any = doc.data()
