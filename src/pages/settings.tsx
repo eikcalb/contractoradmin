@@ -1,18 +1,9 @@
-import React, { useState, useContext } from 'react'
-import { NotificationList } from '../components/notification'
-import { PaymentList } from '../components/payment'
-import { CardFragment } from "../components/util";
-import { JobListItem, JobDetail, DUMMY_JOBS } from '../components/job';
-import { JobSideList } from "../components/JobSideList";
-import { JobList } from "../components/JobList";
-import { UserList } from '../components/user';
-import { CreateJob } from '../components/jobcreation';
-import { NavLink, Route, Switch, Link } from 'react-router-dom';
-import links from '../lib/links';
-import { FaCog, FaCogs, FaApplePay, FaApple, FaPaypal, FaChevronRight } from 'react-icons/fa';
-import { APPLICATION_CONTEXT } from '../lib';
 import { unix } from 'moment';
-import { link } from 'fs';
+import React, { useContext, useState } from 'react';
+import { FaApple, FaChevronRight, FaCogs, FaPaypal } from 'react-icons/fa';
+import { Link, NavLink, Route, Switch } from 'react-router-dom';
+import { APPLICATION_CONTEXT } from '../lib';
+import links from '../lib/links';
 
 export function SettingsDetail({ title, children = <></> }) {
     return (

@@ -1,15 +1,16 @@
 import moment, { unix } from 'moment'
 import React, { useCallback, useState, useContext } from 'react'
-import { FaExpandAlt, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat } from 'react-icons/fa'
-import { GrUserWorker } from "react-icons/gr";
+import { FaExpandAlt, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat, FaCaretRight, FaArrowRight, FaChevronRight } from 'react-icons/fa'
+import { ImSpinner } from "react-icons/im";
 import { NavLink } from 'react-router-dom'
 import { STYLES } from '../lib/theme'
 import { DUMMY_USER, User } from '../lib/user'
-import { IJob, Job } from '../lib/job'
+import { IJob, Job, JOB_MILE_RADIUS } from '../lib/job'
 import firebase from "firebase";
 import { useToasts } from 'react-toast-notifications';
 import { wait } from './util';
 import { APPLICATION_CONTEXT } from '../lib';
+import { MapView } from './map';
 
 export function JobListItem({ job }: { job: IJob }) {
     const ctx = useContext(APPLICATION_CONTEXT)
@@ -40,7 +41,7 @@ export function JobListItem({ job }: { job: IJob }) {
                             <div className='columns is-vcentered is-mobile'>
                                 <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                                     <figure className='image is-flex is-32x32'>
-                                        <img className='is-rounded' src={Job.getJobPhotoURL(ctx, job)} />
+                                        <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} />
                                     </figure>
                                 </div>
                                 <div className='column is-narrow'>
@@ -65,40 +66,43 @@ export function JobListItem({ job }: { job: IJob }) {
 export function JobItem({ job, to }: { job: IJob, to: any }) {
     const ctx = useContext(APPLICATION_CONTEXT)
 
+    if (job.status === 'available') {
+        return <PendingJobItem job={job} to={to} key={`pending-${job.id}`} />
+    }
+
     const time = moment(job.date_created.toMillis())
     let endTime
     if (job.date_completed) endTime = moment(job.date_completed.toMillis())
 
     return (
-        <NavLink activeClassName="is-active" to={to} style={{ overflowX: 'auto' }} className={`job-item mb-8 is-block card is-shadowless has-background-white-ter`}>
-            <div className='card-content'>
+        <NavLink activeClassName="is-active" to={to} style={{ overflowX: 'auto' }} className={`job-item is-size-7 px-1 py-1 is-block card is-shadowless is-radiusless has-background-white`}>
+            <div className='card-content py-2 px-2'>
                 <div className='container is-paddingless'>
                     <div className='columns'>
                         <div className='column is-6 has-text-centered-touch has-text-left'>
-                            <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{job.job_title}</p>
+                            <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{job.job_type}</p>
                         </div>
-                        <div className='column has-text-centered-touch has-text-right'>
+                        <div className='column has-text-centered-touch has-text-right has-text-grey'>
                             <p>{job.location_address}</p>
                         </div>
                     </div>
                     <div className='columns is-vcentered is-mobile'>
                         <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                             <figure className='image is-flex is-48x48'>
-                                <img className='is-rounded' src={Job.getJobPhotoURL(ctx, job)} />
+                                <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} />
                             </figure>
                         </div>
-                        <div className='column is-narrow'>
-                            <div className='title is-6'>{`${job.user?.firstName || 'John'} ${job.user?.lastName || "Doe"}`}</div>
+                        <div className='column px-0 has-text-left'>
+                            <div className='title is-7 mb-1'>{`${job.user?.firstName || 'John'} ${job.user?.lastName || "Doe"}`}</div>
+                            <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user?.starRate}</p>
                         </div>
-                        <div className='column has-text-right'>
+                        <div className='column has-text-grey has-text-right'>
                             {time.calendar()}
                         </div>
                     </div>
-                    <div className='content'>
-                        <p>{job.job_description}</p>
-                    </div>
+
                 </div>
-                <div className='columns px-4 pt-4 is-vcentered is-mobile' style={{ flexDirection: 'column', flex: 1 }}>
+                <div className='columns mb-0 is-vcentered has-text-grey is-mobile' style={{ flexDirection: 'column', flex: 1 }}>
                     <div className='column is-12'>
                         {job.progress && job.progress >= 100 ? (
                             <p>Completed {endTime.calendar()}</p>
@@ -107,8 +111,44 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
                         }
                     </div>
                 </div>
+                <div className='content has-text-left has-text-grey is-flex is-flex-align-items-center'>
+                    <span className='icon has-text-info is-size-6'><FaChevronRight /></span>
+                    <span style={{ lineHeight: '2em' }}>{job.job_title}</span>
+                </div>
             </div>
-        </NavLink >
+        </NavLink>
+    )
+}
+
+export function PendingJobItem({ job, to }: { job: IJob, to: any }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
+
+    return (
+        <NavLink activeClassName="is-active" to={to} style={{ overflowX: 'auto' }} className={`job-item is-size-7 px-1 py-1 is-block card is-shadowless is-radiusless has-background-white`}>
+            <div className='card-content py-2 px-2'>
+                <div className='container is-paddingless'>
+                    <div className='columns'>
+                        <div className='column is-6 has-text-centered-touch has-text-left'>
+                            <p style={{ whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: "hidden" }}>{job.job_type}</p>
+                        </div>
+                        <div className='column has-text-centered-touch has-text-right has-text-grey'>
+                            <p>{job.location_address}</p>
+                        </div>
+                    </div>
+                    <div className='columns is-vcentered is-mobile'>
+                        <div className='column has-text-left'>
+                            <p className='is-size-7 is-flex is-vcentered'>
+                                <span className='icon is-size-6 has-text-info spinner'><ImSpinner /></span>
+                                <span style={{ lineHeight: '2em' }}>Pending</span>
+                            </p>
+                        </div>
+                        <div className='column has-text-right'>
+                            <p>Searching for deployee</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </NavLink>
     )
 }
 
@@ -126,21 +166,28 @@ export function JobDetail({ job, className, onCancel }: { onCancel: (job: IJob) 
     const time = moment(job.date_created.toMillis())
 
     return (
-        <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
+        <div className={`${className} card job-detail is-size-6`} style={{ flexDirection: 'column' }}>
             <div className='card-content is-paddingless'>
                 <div className='level py-4 mb-0'>
-                    <div className='level-item is-size-6'>POSTED {time.calendar()}</div>
-                    <div className='level-item is-size-4 has-text-weight-bold'>{job.job_title}</div>
-                    <div className='level-item is-size-6 has-text-grey'>{job.id}</div>
+                    <div className='level-item is-size-7'>POSTED {time.calendar()}</div>
+                    <div className='level-item is-size-6 has-text-weight-bold'>{job.job_title}</div>
+                    <div className='level-item is-size-7 has-text-grey'>{job.id}</div>
                 </div>
                 <div className='container is-fluid px-0'>
-                    <div className='columns is-fullheight mx-0 my-0 is-multiline'>
+                    <div className='columns is-fullheight mx-0 my-0 is-multiline animate__animated animate__fadeIn'>
                         <div className='column is-8-fullhd is-7-desktop is-12 px-0 pt-0'>
                             <JobDetailTask onJobCancel={onCancel} job={job} />
                         </div>
-                        <div style={{borderLeft:'solid 1px #8881'}} className='column is-4-fullhd is-5-desktop is-12 is-flex'>
-                            <JobDetailUser job={job} />
-                        </div>
+
+                        {job.status === "available" || job.status === 'in review' ?
+                            <div style={{ borderLeft: 'solid 1px #8881' }} className='column is-4-fullhd is-5-desktop is-12 is-flex is-paddingless'>
+                                <MapView job={job} className='container pt-4 pb-0 is-flex' />
+                            </div>
+                            :
+                            <div style={{ borderLeft: 'solid 1px #8881' }} className='column is-4-fullhd is-5-desktop is-12 is-flex'>
+                                <JobDetailUser job={job} />
+                            </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -149,6 +196,7 @@ export function JobDetail({ job, className, onCancel }: { onCancel: (job: IJob) 
 }
 
 export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
     const [state, setState] = useState({ loadingCancel: false })
     const { addToast } = useToasts()
 
@@ -159,13 +207,12 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
 
     const onCancel = useCallback(async () => {
         try {
-            const confirmed = window.confirm("Are you sure you want to cancel this job?")
+            const confirmed = window.confirm("Are you sure you want to cancel this job? If Job is accepted, it will return to the job pool. Otherwise, the job will be deleted")
             if (!confirmed) {
                 return
             }
-
             setState({ ...state, loadingCancel: true })
-            await Job.cancelJob(job)
+            await Job.cancelJob(ctx, job)
             addToast('Cancelled job successfully!', { appearance: 'success' })
             onJobCancel(job)
         } catch (e) {
@@ -177,45 +224,57 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
 
     return (
         <div className='is-atleast-fullheight is-flex' style={{ flexDirection: 'column' }}>
-            <figure className='image is-16by9' style={{ position: 'relative', paddingTop: '30%' }}>
-                <img src={'https://via.placeholder.com/728x90.png'} />
-                <a className='button is-large' style={{ position: 'absolute', bottom: 4, right: 4, background: 'transparent', border: 0 }}>
-                    <span className='icon is-size-2'><FaExpandAlt /></span>
-                </a>
-            </figure>
+            {job.status === 'available' ?
+                <div className='section has-text-centered is-size-6'>
+                    <span className='px-4 py-4 is-flex is-flex-centered'>Searching for deployees within {JOB_MILE_RADIUS} mile radius from you</span>
+                </div>
+                :
+                <figure className='image is-16by9' style={{ position: 'relative', paddingTop: '30%' }}>
+                    <img src={'https://via.placeholder.com/728x90.png'} />
+                    <a className='button is-large' style={{ position: 'absolute', bottom: 4, right: 4, background: 'transparent', border: 0 }}>
+                        <span className='icon is-size-2'><FaExpandAlt /></span>
+                    </a>
+                </figure>
+            }
             <div className='is-flex py-4' style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
-                <div className='section'>
+                <div className='section py-2 pb-3'>
                     <table className='table is-hoverable is-fullwidth'>
-                        <tbody>
-                            <tr>
-                                <td className=' has-text-right'>LOCATION</td>
-                                <td className=' has-text-left'>{job.location_address}</td>
+                        <tbody className='is-flex is-flex-direction-column is-size-7'>
+                            <tr className='is-flex has-text-left'>
+                                <td style={{ flex: 1 }} className='has-text-grey'>TYPE</td>
+                                <td style={{ flex: 2 }} className=' has-text-left'>{job.job_type}</td>
                             </tr>
-                            <tr>
-                                <td className=' has-text-right'>DESCRIPTION</td>
-                                <td className=' has-text-left'>{job.job_description}</td>
+                            <tr className='is-flex has-text-left'>
+                                <td style={{ flex: 1 }} className='has-text-grey'>LOCATION</td>
+                                <td style={{ flex: 2 }} className=' has-text-left'>{job.location_address}</td>
                             </tr>
-                            <tr>
-                                <td className=' has-text-right'>PAY</td>
-                                <td className=' has-text-left'>{job.salary} <span className='has-text-grey is-size-7'>/{job.wage}</span></td>
+                            <tr className='is-flex has-text-left'>
+                                <td style={{ flex: 1 }} className='has-text-grey'>DESCRIPTION</td>
+                                <td style={{ flex: 2 }} className=' has-text-left'>{job.job_description}</td>
                             </tr>
-                            <tr>
-                                <td className=' has-text-right'>TASKS</td>
-                                <td className=' has-text-left'>
-                                    {job.tasks && job.tasks.length > 1 ? job.tasks?.map(task => <p>- {task.text}</p>) : `-`}
-                                </td>
+                            <tr className='is-flex has-text-left'>
+                                <td style={{ flex: 1 }} className='has-text-grey'>PAY</td>
+                                <td style={{ flex: 2 }} className='is-flex-align-items-center is-flex has-text-left'><span>${job.salary}</span>&nbsp;<span className='has-text-grey-light'>/{job.wage}</span></td>
                             </tr>
-                            <tr>
-                                <td className=' has-text-right'> START</td>
-                                <td className='has-text-left'>{startTime.calendar() || `-`}</td>
+                            {job.tasks && job.tasks.length > 0 ?
+                                <tr className='is-flex has-text-left'>
+                                    <td style={{ flex: 1 }} className='has-text-grey'>TASKS</td>
+                                    <td style={{ flex: 2 }} className=' has-text-left'>
+                                        {job.tasks?.map(task => <p key={task.text}>- {task.text}</p>)}
+                                    </td>
+                                </tr>
+                                : null}
+                            <tr className='is-flex has-text-left'>
+                                <td style={{ flex: 1 }} className='has-text-grey'> START</td>
+                                <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar() || `-`}</td>
                             </tr>
-                            <tr>
-                                <td className=' has-text-right'>END</td>
-                                <td className=' has-text-left'>{endTime?.calendar() || `-`}</td>
+                            <tr className='is-flex has-text-left'>
+                                <td style={{ flex: 1 }} className='has-text-grey'>END</td>
+                                <td style={{ flex: 2 }} className=' has-text-left'>{endTime?.calendar() || `-`}</td>
                             </tr>
-                            <tr>
-                                <td className=' has-text-right'>TOTAL TIME</td>
-                                <td className=' has-text-left'>{totalTime?.toFixed(2) || `-`}</td>
+                            <tr className='is-flex has-text-left'>
+                                <td style={{ flex: 1 }} className='has-text-grey'>TOTAL TIME</td>
+                                <td style={{ flex: 2 }} className=' has-text-left'>{totalTime?.toFixed(2) || `-`}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -232,53 +291,56 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
 
 export function JobDetailUser({ job }: { job: IJob }) {
     const ctx = useContext(APPLICATION_CONTEXT)
-
     let startTime
     if (job.date_created) startTime = moment(job.date_created.toMillis())
 
     return (
         <div className='container pt-4 pb-0 is-flex' style={{ flexDirection: 'column' }} >
-            <div className='columns is-vcentered'>
+            <div style={{ borderBottom: 'solid #aaa4 0.2px' }} className='columns is-vcentered'>
                 <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                     <figure className='image is-80x80 is-flex'>
-                        <img className='is-rounded' src={Job.getJobPhotoURL(ctx, job)} />
+                        <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} />
                     </figure>
                 </div>
                 <div className='column'>
                     <div className='container'>
                         <div className='columns is-marginless is-vcentered is-mobile'>
                             <div className='column pb-0 pl-0'>
-                                <p className='is-size-5 has-text-left has-text-weight-bold'>{`${job.user?.firstName || "John"} ${job.user?.lastName || 'Doe'}`}</p>
+                                <p className='is-size-6 has-text-left has-text-weight-bold'>{`${job.user?.firstName || "John"} ${job.user?.lastName || 'Doe'}`}</p>
                             </div>
-                            <div className="column has-text-right pr-0 pb-0 is-size-6">View Profile</div>
+                            <div className="column is-narrow has-text-right has-text-info pr-0 pb-0 is-size-7">View Profile</div>
                         </div>
                         <div className='content has-text-left'>
-                            <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user?.starRate} &nbsp;{generateUserJobType(DUMMY_USER)}</p>
-                            <p>{job.user?.profileBio}</p>
-                            <p className='has-text-right'><span className='is-uppercase has-text-grey-light is-size-7'>member since</span> {job.user?.dateCreated?.toDateString()}</p>
+                            <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user?.starRate}
+                                {/* TODO: should option of remote or onsite be present?
+                             &nbsp;{generateUserJobType(DUMMY_USER)} 
+                             */}
+                            </p>
+                            <p className='is-size-7'>{job.user?.profileBio}</p>
+                            <p className='has-text-left has-text-grey-light is-size-7'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar()}</p>
                         </div>
                     </div>
                 </div>
             </div>
             <div className='is-flex py-4' style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
                 <table className='table is-hoverable is-fullwidth'>
-                    <tbody>
-                        <tr>
-                            <td className='has-text-right'>CONTACT</td>
-                            <td className='has-text-left'>{job.user?.phoneNumber}</td>
+                    <tbody className='is-size-7'>
+                        <tr className='is-flex has-text-left'>
+                            <td style={{ flex: 1 }} className='has-text-grey'>CONTACT</td>
+                            <td style={{ flex: 2 }} className='has-text-left'>{job.user?.phoneNumber}</td>
                         </tr>
                         {/* <tr>
                             <td className='has-text-right'>ACTIVE TASK</td>
                             <td className='has-text-left'>{job.user?.activeTask}</td>
                         </tr> */}
-                        <tr>
-                            <td className='has-text-right'>START TIME</td>
-                            <td className='has-text-left'>{startTime.calendar()}</td>
+                        <tr className='is-flex has-text-left'>
+                            <td style={{ flex: 1 }} className='has-text-grey'>START TIME</td>
+                            <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar()}</td>
                         </tr>
-                        <tr>
-                            <td className='has-text-right'>HIGHLIGHTED SKILLS AND LICENSES</td>
-                            <td className='has-text-left'>
-                                {job.user?.skills && job.user.skills.length > 1 ? job.user.skills?.map(task => <p>- {task}</p>) : `-`}
+                        <tr className='is-flex has-text-left'>
+                            <td style={{ flex: 1 }} className='has-text-grey'>HIGHLIGHTED SKILLS AND LICENSES</td>
+                            <td style={{ flex: 2 }} className='has-text-left'>
+                                {job.user?.skills && job.user.skills.length > 0 ? job.user.skills?.map(task => <p>- {task}</p>) : `-`}
                             </td>
 
                         </tr>

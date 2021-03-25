@@ -58,7 +58,7 @@ class AppUser {
             this.state = data.state
             this.skills = data.skills
         }
-        
+
         this.id = data.id
     }
 }
@@ -113,12 +113,20 @@ export class User extends AppUser {
         }
     }
 
-
-    static async getUserData(app: Application, id: string) {
+    /**
+       * 
+       * @param app Application object
+       * @param id Identity of user whose detail will be fetched
+       */
+    static async getExternalUser(app: Application, id: string): Promise<User> {
         try {
             const response = await app.initiateNetworkRequest(`/users/${id}`, {
                 method: 'GET',
-            })
+                referrerPolicy: "no-referrer",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            }, true)
             if (!response.ok) {
                 throw new Error((await response.json())?.message || "Failed to fetch user data!")
             }
@@ -128,9 +136,9 @@ export class User extends AppUser {
             user.id = id
 
             return user
-
         } catch (e) {
-            throw e
+            console.log('failed to fetch user data', e)
+            return new User({})
         }
     }
 }

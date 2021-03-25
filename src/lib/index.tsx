@@ -91,17 +91,22 @@ export class Application {
         return await localforage.setItem(KEYS.APP_DATA, this.settings)
     }
 
-    async initiateNetworkRequest(path: string, request?: RequestInit, authenticated = false): Promise<Response> {
+    async initiateNetworkRequest(path: string, request?: RequestInit, authenticated = false, isJson = true): Promise<Response> {
+        const headers = {
+            ...request?.headers,
+            Accept: 'application/json',
+            Authorization: authenticated ? `Bearer ${this.user?.token}` : request?.headers?.['Authorization'],
+        }
+
+        if (isJson) {
+            headers['Content-Type'] = 'application/json'
+        }
+        
         const reqObj: RequestInit = {
             ...request,
             referrerPolicy: 'no-referrer',
             mode: 'cors',
-            headers: {
-                ...request?.headers,
-                Accept: 'application/json',
-                Authorization: authenticated ? `Bearer ${this.user?.token}` : request?.headers?.['Authorization'],
-                'Content-Type': 'application/json'
-            }
+            headers
         }
 
         const resp = await fetch(`${this.config.hostname}${path}`, reqObj)
@@ -271,8 +276,7 @@ export class Application {
                 body: JSON.stringify({
                     ...data,
                     role: 'admin',
-                    // TODO: change to 'pending'
-                    account_status: 'accepted'
+                    account_status: 'pending'
                 })
             })
             if (!response.ok) {
@@ -366,4 +370,7 @@ export interface Config {
     version: string
     description: string
     hostname: string
+    Google: {
+        mapKey: string
+    }
 }

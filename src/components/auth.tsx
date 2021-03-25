@@ -86,13 +86,13 @@ export function RegisterView() {
                     <div className='field-body'>
                         <div className='field'>
                             <div className='control has-icons-left '>
-                                <input autoComplete="given-name" disabled={state.loading} required value={formState.first_name} onChange={(e) => setFormState({ ...formState, first_name: e.target.value })} placeholder='enter firstname...' className='input' type='text' />
+                                <input autoComplete="given-name" disabled={state.loading} required value={formState.first_name} onChange={(e) => setFormState({ ...formState, first_name: e.target.value })} placeholder='enter firstname' className='input' type='text' />
                                 <span className='icon is-left is-small'><FaUser /></span>
                             </div>
                         </div>
                         <div className='field'>
                             <div className='control has-icons-left '>
-                                <input autoComplete="family-name" disabled={state.loading} required value={formState.last_name} onChange={(e) => setFormState({ ...formState, last_name: e.target.value })} placeholder='enter lastname...' className='input' type='text' />
+                                <input autoComplete="family-name" disabled={state.loading} required value={formState.last_name} onChange={(e) => setFormState({ ...formState, last_name: e.target.value })} placeholder='enter lastname' className='input' type='text' />
                                 <span className='icon is-left is-small'><FaUser /></span>
                             </div>
                         </div>
@@ -101,14 +101,14 @@ export function RegisterView() {
 
                 <div className='field'>
                     <div className='control has-icons-left '>
-                        <input autoComplete="off" disabled={state.loading} required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} placeholder='enter your email address...' className='input' type='email' />
+                        <input autoComplete="off" disabled={state.loading} required value={formState.email} onChange={(e) => setFormState({ ...formState, email: e.target.value })} placeholder='enter your email address' className='input' type='email' />
                         <span className='icon is-left is-small'><FaEnvelope /></span>
                     </div>
                 </div>
 
                 <div className='field'>
                     <div className='control has-icons-left '>
-                        <input autoComplete="off" disabled={state.loading} required value={formState.phone_number} onChange={(e) => setFormState({ ...formState, phone_number: e.target.value })} placeholder='enter your phone number include the "+" sign...' className='input' type='tel' />
+                        <input autoComplete="off" disabled={state.loading} required value={formState.phone_number} onChange={(e) => setFormState({ ...formState, phone_number: e.target.value })} placeholder='enter your phone number include the "+" sign' className='input' type='tel' />
                         <span className='icon is-left is-small'><FaPhoneAlt /></span>
                     </div>
                 </div>
@@ -117,7 +117,7 @@ export function RegisterView() {
                     <div className='field-body'>
                         <div className='field has-addons'>
                             <div className='control has-icons-left is-expanded'>
-                                <input autoComplete="off" disabled={state.loading} required value={formState.password} onChange={(e) => setFormState({ ...formState, password: e.target.value })} placeholder='enter your password...' className='input' type={state.showPassword ? 'text' : 'password'} />
+                                <input autoComplete="off" disabled={state.loading} required value={formState.password} onChange={(e) => setFormState({ ...formState, password: e.target.value })} placeholder='enter your password' className='input' type={state.showPassword ? 'text' : 'password'} />
                                 <span className='icon is-left is-small'><FaKey /></span>
                             </div>
                             <div className='control'>
@@ -128,7 +128,7 @@ export function RegisterView() {
 
                         <div className='field has-addons'>
                             <div className='control has-icons-left is-expanded'>
-                                <input autoComplete="off" disabled={state.loading} required value={formState.password_verify} onChange={(e) => setFormState({ ...formState, password_verify: e.target.value })} placeholder='re-enter your password...' className='input' type={state.showPasswordVerify ? 'text' : 'password'} />
+                                <input autoComplete="off" disabled={state.loading} required value={formState.password_verify} onChange={(e) => setFormState({ ...formState, password_verify: e.target.value })} placeholder='re-enter your password' className='input' type={state.showPasswordVerify ? 'text' : 'password'} />
                                 <span className='icon is-left is-small'><FaKey /></span>
                             </div>
                             <div className='control'>
@@ -293,7 +293,7 @@ function CodeRequestForm({ onSubmit, loading, onComplete }) {
         <form onSubmit={onSubmitForm}>
             <div className='field'>
                 <div className='control has-icons-left '>
-                    <input autoComplete="off" disabled={loading || viewState.hold} required value={state.phone} onChange={(e) => setState({ ...state, phone: e.target.value })} placeholder='enter your phone number...' className='input is-rounded' type='tel' />
+                    <input autoComplete="off" disabled={loading || viewState.hold} required value={state.phone} onChange={(e) => setState({ ...state, phone: e.target.value })} placeholder='enter your phone number' className='input is-rounded' type='tel' />
                     <span className='icon is-left is-small'><FaPhoneAlt /></span>
                 </div>
 
@@ -360,19 +360,19 @@ function LoginForm({ phone, loading, onSubmit, onCancel }) {
         <form onSubmit={onSubmitForm} >
             <div className='field'>
                 <div className='control has-icons-left'>
-                    <input autoComplete="off" disabled required value={state.phone_number} placeholder='enter your phone number...' className='input' type='tel' />
+                    <input autoComplete="off" disabled required value={state.phone_number} placeholder='enter your phone number' className='input' type='tel' />
                     <span className='icon is-left is-small'><FaUser /></span>
                 </div>
             </div>
             <div className='field'>
                 <div className='control has-icons-left'>
-                    <input autoComplete="off" pattern={'/.{4}/'} max={9999} maxLength={4} minLength={4} disabled={state.loading} required value={state.code} onChange={(e) => setState({ ...state, code: e.target.value })} placeholder='enter 4 digits code...' className='input' type='number' />
+                    <input autoComplete="off" pattern={'/.{4}/'} max={9999} maxLength={4} minLength={4} disabled={state.loading} required value={state.code} onChange={(e) => setState({ ...state, code: e.target.value })} placeholder='enter 4 digits code' className='input' type='number' />
                     <span className='icon is-left is-small'><RiLockPasswordLine /></span>
                 </div>
             </div>
             <div className='field has-addons'>
                 <div className='control has-icons-left is-expanded'>
-                    <input autoComplete="off" disabled={state.loading} required value={state.password} onChange={(e) => setState({ ...state, password: e.target.value })} placeholder='enter your password...' className='input' type={state.showPassword ? 'text' : 'password'} />
+                    <input autoComplete="off" disabled={state.loading} required value={state.password} onChange={(e) => setState({ ...state, password: e.target.value })} placeholder='enter your password' className='input' type={state.showPassword ? 'text' : 'password'} />
                     <span className='icon is-left is-small'><FaKey /></span>
                 </div>
                 <div className='control'>

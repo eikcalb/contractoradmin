@@ -1,6 +1,6 @@
 import Tags from "@yaireo/tagify/dist/react.tagify";
 import React, { useState, useCallback, useMemo, useContext, useEffect, useLayoutEffect, createRef, Ref, useRef } from 'react';
-import { FaChevronLeft, FaMapMarkerAlt, FaSearch, FaUpload } from 'react-icons/fa';
+import { FaChevronLeft, FaMapMarkerAlt, FaSearch, FaUpload, FaDollarSign } from 'react-icons/fa';
 import { useToasts } from 'react-toast-notifications';
 import { debounce } from "./util";
 import { Job, IJob } from "../lib/job";
@@ -18,7 +18,7 @@ import { v4 } from "uuid";
 export function FormField({ label, value, onChange, className, type, placeholder, icon, tagifyRef = null as any, required = false, whitelist = [] as any[], mode = 'select', disabled = false, loading = false, tags = false, showBorder = true, containerClassName = '', isTextArea = false, maxLength = Number.MAX_SAFE_INTEGER, helpTextTop = "", helpTextLeft = "", helpTextRight = "", hasAddons = false, addon = <></> }) {
     return (
         <div className={`${containerClassName} ${showBorder ? 'job-form-field' : ''} field has-text-left`}>
-            <label className='label is-flex' style={{ justifyContent: 'space-between' }}><span>{label}</span> <span className='has-text-right has-text-weight-normal is-size-7'>{helpTextTop}</span></label>
+            <label className='label is-flex' style={{ justifyContent: 'space-between', alignItems: 'center' }}><span>{label}</span> <span className='has-text-right has-text-weight-normal is-size-7'>{helpTextTop}</span></label>
             {!hasAddons ?
                 <div className={`control ${icon ? 'has-icons-left' : ''} is-expanded`}>
                     {isTextArea ?
@@ -120,7 +120,7 @@ export function FileInput({ disabled, value, onChange, onRemovePhoto }) {
 
     return (
         <div className='field job-form-field has-text-left my-4'>
-            <label className='label is-flex' style={{ justifyContent: 'space-between' }}><span>Job Photos</span> <span className='has-text-right has-text-weight-normal is-size-7'>Add photos to help describe this job</span></label>
+            <label className='label is-flex' style={{ justifyContent: 'space-between', alignItems: 'center' }}><span>Job Photos</span> <span className='has-text-right has-text-weight-normal is-size-7'>Add photos to help describe this job</span></label>
             <div className='control is-expanded'>
                 <div className='file is-flex is-centered is-normal'>
                     <label className='file-label is-flex-grow-1'>
@@ -148,7 +148,7 @@ export function FileInput({ disabled, value, onChange, onRemovePhoto }) {
                 {value && value.length > 0 ?
                     <div className='field is-grouped is-grouped-multiline'>
                         {value.map((file: File, index) =>
-                            <div className='control mr-2 my-2 '>
+                            <div key={`${index}-${file.name}`} className='control mr-2 my-2 '>
                                 <div className='tags has-addons'>
                                     <span key={`${file.name}-${file.size}-${index}`} className='tag is-dark'>{file.name}</span>
                                     <button onClick={() => { onRemovePhoto(index) }} className='tag is-delete'></button>
@@ -235,7 +235,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                     posted_by: ctx.user?.id,
                     salary: parseInt(state.price, 10),
                     required_count: parseInt(state.requiredPersons, 10),
-                    wage: 'hr',
+                    wage: 'deployment',
                     status: 'available',
                     tasks: JSON.parse(state.tasks).map(v => ({ id: v4(), text: v.value })),
                     location_address: state.address,
@@ -293,12 +293,13 @@ export function CreateJob({ onClose, show, onComplete }) {
                                     <FormField required disabled={state.loading} value={state.type} tagifyRef={tagifyRef} tags whitelist={types.jobTypes} onChange={(type) => setState((state) => ({ ...state, type }))} className='' containerClassName='mb-4' label="Job Type" placeholder='Begin typing a job type' type='text' icon={<FaSearch />} helpTextLeft='Search and select a job type to improve search results when finding a contractor' />
                                     <FormField required disabled={state.loading} value={state.title} onChange={(title) => setState({ ...state, title })} className='' containerClassName='my-4' label="Title" placeholder='Provide a title for the job' type='text' icon={null} helpTextLeft='Will be seen by contractors in search result and as an active status' helpTextRight='Maximum 30 characters' maxLength={30} />
                                     <FormField required disabled={state.loading} value={state.description} onChange={(description) => setState({ ...state, description })} className='' containerClassName='my-4' label="Description" isTextArea placeholder='Provide a description of the job' type='text' icon={null} helpTextLeft='Give a short description to improve finding a contractor that fits the job' helpTextRight='Maximum 80 characters' maxLength={80} />
-                                    <FormField required disabled={state.loading || state.fetchingLocation} value={state.address} tagifyRef={tagifyRef2} tags={!state.manualAddress} whitelist={types.location} onChange={(address) => setState((state) => ({ ...state, address }))} className='' containerClassName='my-4' label="Location Address" placeholder='Begin typing the first line of the address' type='text' icon={<FaMapMarkerAlt />}
+                                    <FormField required={!state.manualAddress} disabled={state.loading || state.fetchingLocation} value={state.address} tagifyRef={tagifyRef2} tags={!state.manualAddress} whitelist={types.location} onChange={(address) => setState((state) => ({ ...state, address }))} className='' containerClassName='my-4' label="Location Address" placeholder='Begin typing the first line of the address' type='text' icon={<FaMapMarkerAlt />}
                                         hasAddons addon={(
                                             <div className='control'>
-                                                <button disabled={state.loading || state.fetchingLocation} className={`button has-background-white ${state.fetchingLocation ? 'is-loading' : ''} ${state.manualAddress ? 'is-info has-text-white' : ''}`} onClick={async () => {
+                                                <button disabled={state.loading || state.fetchingLocation} className={`button ${state.fetchingLocation ? 'is-loading' : ''} ${state.manualAddress ? 'is-info has-text-white' : ''}`} onClick={async () => {
                                                     const manualAddress = !state.manualAddress
                                                     if (manualAddress) {
+                                                        // If manual address is true, fetch the current location
                                                         setState({ ...state, fetchingLocation: true })
                                                         try {
                                                             setState({ ...state, location: await getCurrentLocation() })
@@ -312,7 +313,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                                                     } else {
                                                         setState((state) => ({ ...state, location: null, manualAddress }))
                                                     }
-                                                }} type='button' style={{ color: 'black', borderLeft: 0, zIndex: 4 }}><span className='is-size-7'>or use current location</span></button>
+                                                }} type='button' style={{ color: state.manualAddress ? 'unset' : 'black', borderLeft: 0, zIndex: 4 }}><span className='is-size-7'>{state.manualAddress ? 'using current location' : 'or use current location'}</span></button>
                                             </div>
                                         )}
                                     />
@@ -331,7 +332,7 @@ export function CreateJob({ onClose, show, onComplete }) {
                                     <FormField required disabled={state.loading} value={state.price} onChange={(price) => setState({ ...state, price })} hasAddons className='' containerClassName='my-4' label="Pay"
                                         placeholder='Provide an amount'
                                         type='number' helpTextLeft='Will be seen in search results. Cannot be adjusted once the listing is pending or active'
-                                        icon={null}
+                                        icon={<FaDollarSign />}
                                         addon={(
                                             <div className='control'>
                                                 <button className='button' disabled style={{ color: 'black', borderLeft: 0 }}>Per Deployment</button>

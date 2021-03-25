@@ -42,9 +42,9 @@ export function NotificationList({ className }) {
     return (
         <nav className={className}>
             <div className='panel is-clipped' >
-                <div onClick={() => setExpanded(!expanded)} className='panel-heading has-text-left has-background-white-bis is-align-items-center is-flex is-flex-direction-row is-justify-content-space-between'>
+                <div onClick={() => setExpanded(!expanded)} className='panel-heading is-size-6 has-text-left has-background-white-bis is-align-items-center is-flex is-flex-direction-row is-justify-content-space-between'>
                     <p>Notifications</p>
-                    <button className='button is-static has-background-white is-rounded is-small'>
+                    <button className='button is-static has-background-white is-rounded is-size-8 is-small'>
                         {!expanded ?
                             <FaCaretUp size={16} className={`icon has-text-black is-small`} />
                             :

@@ -1,10 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { DUMMY_USER } from '../lib/user';
+import { DUMMY_USER, User } from '../lib/user';
 import { APPLICATION_CONTEXT } from '../lib';
 import { Job, IJob } from '../lib/job';
 import { useToasts } from 'react-toast-notifications';
 import { JobListItem } from './job';
+import links from '../lib/links';
 
 export function JobList({ className }: { className?: string; }) {
     const ctx = useContext(APPLICATION_CONTEXT);
@@ -21,7 +22,9 @@ export function JobList({ className }: { className?: string; }) {
             }
             docs = await Promise.all(
                 docs.map(async (v) => {
-                    v.user = DUMMY_USER;
+                    if (v.status !== 'available' && v.executed_by) {
+                        v.user = await User.getExternalUser(ctx, v.executed_by);
+                    }
                     return v;
                 })
             );
@@ -36,7 +39,7 @@ export function JobList({ className }: { className?: string; }) {
             {state.loading ?
                 <progress className="progress is-small is-info my-6" max="100">loading</progress>
                 : state.jobs.map(j => (
-                    <Link key={j.id} to={`/${j.id}`} className='column is-4-fullhd is-6-desktop is-12-touch list-item'>
+                    <Link key={j.id} to={`${links.activeJobs}/${j.id}`} className='column is-4-fullhd is-6-desktop is-12-touch list-item'>
                         <JobListItem job={j} />
                     </Link>
                 ))}

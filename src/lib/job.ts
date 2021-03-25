@@ -4,6 +4,9 @@ import { useCallback } from "react";
 import { User } from "./user";
 import { Application } from ".";
 
+
+export const JOB_MILE_RADIUS = 10
+
 export interface IJob {
     id
     coordinates: firebase.firestore.GeoPoint
@@ -75,7 +78,7 @@ export class Job {
     }
 
     static async addNewJob(app: Application, job, photos: File[] = []) {
-        if (!job.posted_by || !job.job_title || !job.salary || !job.wage || !job.location || !job.location_address) {
+        if (!job.posted_by || !job.job_title || !job.salary || !job.wage || (!job.location && !job.location_address)) {
             throw new Error('Complete all required fields to continue!')
         }
         if (job.tasks.length < 1) {
@@ -88,7 +91,7 @@ export class Job {
             throw new Error("Provide the number of people you require for this job!")
         }
         if (job.salary < 0) {
-            throw new Error("Salary must be more than 0!")
+            throw new Error("Salary must be more than $0!")
         }
 
         job.coordinates = new firebase.firestore.GeoPoint(job.location.coords.latitude, job.location.coords.longitude)
@@ -108,7 +111,7 @@ export class Job {
                     "x-job-id": newDoc.id,
                 },
                 body,
-            }, true)
+            }, true, false)
 
             if (!apiResponse.ok) {
                 throw new Error((await apiResponse.json()).message || "Failed to upload job");
@@ -121,11 +124,19 @@ export class Job {
         return newDoc.set({ ...job, photo_files })
     }
 
-    static async cancelJob(job: IJob) {
+    static async cancelJob(ctx: Application, job: IJob) {
         if (job.status === 'complete') {
             throw new Error('You cannot cancel a completed job!')
         }
-        await Job.db.doc(job.id).delete()
+
+        if (job.status === 'accepted') {
+            await ctx.initiateNetworkRequest(`users/cancelJob`, {
+                method: 'DELETE',
+                body: JSON.stringify({ jobID: job.id, role: ctx.user?.role })
+            }, true)
+        } else {
+            await Job.db.doc(job.id).delete()
+        }
         return true
     }
 
@@ -135,6 +146,9 @@ export class Job {
             snap.forEach(doc => {
                 const item: any = doc.data()
                 item.id = doc.id
+                if (item.location?.address) {
+                    item.location_address = item.location.address
+                }
                 jobs.push(item)
             })
             return Promise.resolve(jobs)
@@ -142,26 +156,48 @@ export class Job {
     }
 
     static async getActiveJobs(limit = 20) {
-        return Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(20).get().then(async snap => {
+        return Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
             const jobs: IJob[] = []
             snap.forEach(async doc => {
                 const item: any = doc.data()
                 item.id = doc.id
+                if (item.location?.address) {
+                    item.location_address = item.location.address
+                }
                 jobs.push(item)
             })
             return Promise.resolve(jobs)
         })
     }
 
-    static listenForActiveJobs(callback) {
-        const unsubscribe = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).limit(6).onSnapshot(async snap => {
+    static listenForActiveAndPendingJobs(callback, limit = 100) {
+        const unsubscribe = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).limit(limit).onSnapshot(async snap => {
             const jobs: IJob[] = [];
             (snap.native as firebase.firestore.QuerySnapshot).forEach(doc => {
                 const item: any = doc.data()
                 item.id = doc.id
+                if (item.location?.address) {
+                    item.location_address = item.location.address
+                }
                 jobs.push(item)
             })
-            console.log(jobs)
+            callback(null, jobs)
+        }, err => callback(err, null))
+
+        return unsubscribe
+    }
+
+    static listenForActiveJobs(callback, limit = 9) {
+        const unsubscribe = Job.db.where('status', 'in', ["in review", "accepted", "in progress"]).limit(limit).onSnapshot(async snap => {
+            const jobs: IJob[] = [];
+            (snap.native as firebase.firestore.QuerySnapshot).forEach(doc => {
+                const item: any = doc.data()
+                item.id = doc.id
+                if (item.location?.address) {
+                    item.location_address = item.location.address
+                }
+                jobs.push(item)
+            })
             callback(null, jobs)
         }, err => callback(err, null))
 
@@ -192,7 +228,7 @@ export class Job {
         return unsubscribe
     }
 
-    static getJobPhotoURL(app: Application, job: IJob) {
-        return `${app.config.hostname}/images/${job.posted_by}.jpg`
+    static getPhotoURL(app: Application, id) {
+        return `${app.config.hostname}/images/${id}.jpg`
     }
 }

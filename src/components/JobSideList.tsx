@@ -11,7 +11,7 @@ export function JobSideList({ className, activeJobs, inactiveJobs, onCreateNew }
         <div className={`${className} panel job-panel has-background-white-ter is-flex`}>
             <div className='panel-heading is-flex is-vcentered'>
                 <p className='has-text-left'>Job Listings</p>
-                <a className='button is-rounded' onClick={onCreateNew}><BsPencilSquare /></a>
+                <a className='button is-small is-rounded' onClick={onCreateNew}><BsPencilSquare /></a>
             </div>
             <div className='panel-block'>
                 <div className='field has-addons' style={{ flex: 1 }}>

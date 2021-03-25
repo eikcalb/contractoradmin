@@ -7,23 +7,22 @@ import Toolbar from './components/toolbar';
 import { Loading } from './components/util';
 import { APPLICATION_CONTEXT, VIEW_CONTEXT } from './lib';
 import './lib/firebase';
-import { Job } from './lib/job';
 import links from './lib/links';
-import { User, DUMMY_USER } from './lib/user';
+import { User } from './lib/user';
 import { Dashboard } from './pages/dashboard';
 import { Jobs } from './pages/jobs';
 import { Login } from './pages/login';
 import { Logout } from './pages/logout';
+import { Messages } from './pages/messages';
 import { Register } from './pages/register';
 import { Settings } from './pages/settings';
-import { Messages } from './pages/messages';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
   const [state, setState] = useState({ ready: false, })
   const [showFooter, setShowFooter] = useState(true)
   const [_showToolbar, showToolbar] = useState(true)
-  const [signedIn, setSignedIn] = useState<null | User>(DUMMY_USER)
+  const [signedIn, setSignedIn] = useState<null | User>(null)
 
   const viewContext = {
     signedIn,

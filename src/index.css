@@ -23,3 +23,16 @@ code {
 .button.is-white.is-loading::after {
     border-color: transparent transparent #fff #fff!important;
 }
+
+.spinner {
+    animation: spin linear 16s infinite
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}

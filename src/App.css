@@ -15,6 +15,10 @@
     height: 0
 }
 
+.is-size-8 {
+    font-size: 0.65rem!important;
+}
+
 .is-flex-centered {
     display: flex!important;
     justify-content: center;
@@ -23,6 +27,10 @@
 
 .is-fullheight {
     height: 100%;
+}
+
+.has-text-info {
+    color: #0e76a8;
 }
 
 .is-atleast-fullheight {
@@ -76,8 +84,8 @@
     font-size: 0.8em;
 }
 
-.job-item:not(:first-of-type) .card {
-    margin-top: 0.8em;
+.job-item.card {
+    border-bottom: 0.2px solid #aaa4;
 }
 
 @media screen and (max-width: 768px) {
@@ -92,6 +100,11 @@
 .job-item.card.is-active,
 .job-item.card:hover {
     background-color: white!important;
+}
+
+.job-item.card.is-active {
+    border-left: solid #0e76a8!important;
+    background-color: #f2f6f7!important;
 }
 
 .job-detail.card {

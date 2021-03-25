@@ -10,13 +10,13 @@ import links from '../lib/links';
 export function Dashboard() {
     return (
         <div className='columns is-1 is-variable px-3 py-3 is-atleast-fullheight'>
-            <NotificationList className='column is-3 is-2-widescreen' />
+            <NotificationList className='column is-3 is-size-6 is-2-widescreen' />
             <div className='column is-6 is-8-widescreen is-flex' style={{ flexDirection: 'column', justifyContent: 'space-between' }}>
                 <CardFragment header='Active Jobs' optionsElement={<Link to={links.activeJobs}>View All</Link>} style={{ marginBottom: '0.8em' }}>
-                    <JobList className={'columns is-multiline is-1 is-variable'} />
+                    <JobList className={'columns is-centered is-vcentered is-multiline is-1 is-variable'} />
                 </CardFragment>
             </div>
-            <PaymentList className='column is-3 is-2-widescreen' />
+            <PaymentList className='column is-3 is-size-6 is-2-widescreen' />
         </div>
     )
 }
