@@ -1,5 +1,7 @@
-import React, { ReactChild } from 'react'
+import React, { ReactChild, useEffect, useState, useContext } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa';
+import { Loader } from '@googlemaps/js-api-loader';
+import { APPLICATION_CONTEXT } from '../lib';
 
 export function Empty({ content, icon, onDismiss, text, ...props }: { text?: string, content?: ReactChild, icon?: ReactChild, onDismiss?: any, children?: ReactChild }) {
     return (
@@ -54,6 +56,24 @@ export function CardFragment({ header, optionsElement, optionsText, onOptionsTex
     )
 }
 
+let mapsLoaded = false
+export function useLoadGoogleMaps() {
+    const ctx = useContext(APPLICATION_CONTEXT)
+    const [loading, setLoading] = useState(!mapsLoaded)
+
+    useEffect(() => {
+        if (loading) {
+            new Loader({
+                apiKey: ctx.config.Google.mapKey,
+                version: "weekly",
+                libraries: ['places']
+            }).load()
+                .then(() => setLoading(false))
+        }
+    }, [])
+
+    return loading
+}
 
 export function debounce(func, wait: number, immediate: boolean = false) {
     var timeout;

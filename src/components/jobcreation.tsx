@@ -2,7 +2,7 @@ import Tags from "@yaireo/tagify/dist/react.tagify";
 import React, { useState, useCallback, useMemo, useContext, useEffect, useLayoutEffect, createRef, Ref, useRef } from 'react';
 import { FaChevronLeft, FaMapMarkerAlt, FaSearch, FaUpload, FaDollarSign } from 'react-icons/fa';
 import { useToasts } from 'react-toast-notifications';
-import { debounce } from "./util";
+import { debounce, useLoadGoogleMaps } from "./util";
 import { Job, IJob } from "../lib/job";
 import firebase from 'firebase'
 import { APPLICATION_CONTEXT } from "../lib";
@@ -15,7 +15,47 @@ import { v4 } from "uuid";
  * 
  * @param param Object containing parameters to build the input field
  */
-export function FormField({ label, value, onChange, className, type, placeholder, icon, tagifyRef = null as any, required = false, whitelist = [] as any[], mode = 'select', disabled = false, loading = false, tags = false, showBorder = true, containerClassName = '', isTextArea = false, maxLength = Number.MAX_SAFE_INTEGER, helpTextTop = "", helpTextLeft = "", helpTextRight = "", hasAddons = false, addon = <></> }) {
+export function FormField({ label, value, onChange, className, type, placeholder, icon, readOnly = false, locationAutocomplete = false, tagifyRef = null as any, required = false, whitelist = [] as any[], mode = 'select', disabled = false, loading = false, tags = false, showBorder = true, containerClassName = '', isTextArea = false, maxLength = Number.MAX_SAFE_INTEGER, helpTextTop = "", helpTextLeft = "", helpTextRight = "", hasAddons = false, addon = <></> }) {
+    const inputRef = useRef<HTMLInputElement>(null)
+    const loadingGoogleMaps = useLoadGoogleMaps()
+    let listener: google.maps.MapsEventListener
+    let autocomplete: google.maps.places.Autocomplete
+
+    useEffect(() => {
+
+        if (inputRef.current && locationAutocomplete && !loadingGoogleMaps) {
+            autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
+                fields: ['formatted_address', 'geometry', 'place_id']
+            })
+
+            listener = autocomplete.addListener('place_changed', () => {
+                const place = autocomplete.getPlace()
+                const data = {
+                    address: place.formatted_address,
+                    coords: {
+                        longitude: place.geometry?.location?.lng(),
+                        latitude: place.geometry?.location?.lat(),
+                    },
+                    id: place.place_id,
+                    place_id: place.place_id
+                }
+                onChange(data)
+            })
+        }
+
+        return () => {
+            listener?.remove()
+            autocomplete?.unbindAll()
+        }
+    }, [loadingGoogleMaps, locationAutocomplete])
+
+    useEffect(() => {
+        if (!locationAutocomplete && inputRef.current && google) {
+            listener?.remove()
+            google.maps?.event?.clearInstanceListeners(inputRef.current)
+        }
+    }, [locationAutocomplete])
+
     return (
         <div className={`${containerClassName} ${showBorder ? 'job-form-field' : ''} field has-text-left`}>
             <label className='label is-flex' style={{ justifyContent: 'space-between', alignItems: 'center' }}><span>{label}</span> <span className='has-text-right has-text-weight-normal is-size-7'>{helpTextTop}</span></label>
@@ -59,16 +99,22 @@ export function FormField({ label, value, onChange, className, type, placeholder
                                     autoComplete: {
                                         enabled: true,
                                         rightKey: true
-                                    }
+                                    },
+                                    maxLength
                                 }}
+                                readOnly={readOnly}
                                 required={required}
                                 className={`${className} input`}
                                 loading={loading}
+                                maxLength={maxLength}
                                 disabled={disabled}
                                 onChange={e => (e.persist(), onChange(e.target.value))}
                             />
                             :
-                            <input required={required} disabled={disabled} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={`${className} input`} type={type} placeholder={placeholder} />
+                            locationAutocomplete ?
+                                <input ref={inputRef} key={'autocomplete'} required={required} disabled={disabled} value={undefined} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={`${className} input`} type={type} placeholder={placeholder} />
+                                :
+                                <input ref={inputRef} key={'nonutocomplete'} required={required} disabled={disabled} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={`${className} input`} type={type} placeholder={placeholder} />
                     }
                     {icon ? <span className='icon is-small is-left'>{icon}</span> : null}
                 </div>
@@ -89,14 +135,19 @@ export function FormField({ label, value, onChange, className, type, placeholder
                                         rightKey: true
                                     }
                                 }}
+                                readOnly={readOnly}
                                 required={required}
                                 className={`${className} input`}
                                 disabled={disabled}
                                 loading={loading}
+                                maxLength={maxLength}
                                 onChange={e => (e.persist(), onChange(e.target.value))}
                             />
                             :
-                            <input required={required} disabled={disabled} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={`${className} input`} type={type} placeholder={placeholder} style={{ borderRight: 0 }} />
+                            locationAutocomplete ?
+                                <input ref={inputRef} key='autocomplete-2' required={required} disabled={disabled} value={undefined} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={`${className} input`} type={type} placeholder={placeholder} style={{ borderRight: 0 }} />
+                                :
+                                <input ref={inputRef} key='non-autocomplete-2' required={required} disabled={disabled} value={value} onChange={(e) => onChange(e.target.value)} maxLength={maxLength} className={`${className} input`} type={type} placeholder={placeholder} style={{ borderRight: 0 }} />
                         }
                         {icon ? <span className='icon is-small is-left'>{icon}</span> : null}
                     </div>
@@ -212,7 +263,6 @@ export function CreateJob({ onClose, show, onComplete }) {
 
                     (tagifyRef.current as any).settings.whitelist = types.jobTypes
                 }
-                console.log(types.jobTypes, 'job types fetched')
             } catch (e) {
                 console.log(e)
                 addToast('Failed to load job types!', { appearance: 'error' })
@@ -220,42 +270,51 @@ export function CreateJob({ onClose, show, onComplete }) {
         })
     }, [])
 
-
     return (
         <form className={`modal ${show ? 'is-active' : ''}`} onSubmit={async (e) => {
             e.stopPropagation()
             e.preventDefault()
-            // TODO: handle processing before complete
             setState({ ...state, loading: true })
             try {
-                const newJob = {
+                const job_type = JSON.parse(state.type)[0]?.value
+                console.log(job_type, state.type)
+                const newJob: any = {
                     date_created: firebase.firestore.FieldValue.serverTimestamp(),
                     job_title: state.title,
-                    job_type: JSON.parse(state.type)[0].value.toLowerCase(),
+                    job_type,
                     posted_by: ctx.user?.id,
                     salary: parseInt(state.price, 10),
                     required_count: parseInt(state.requiredPersons, 10),
                     wage: 'deployment',
                     status: 'available',
                     tasks: JSON.parse(state.tasks).map(v => ({ id: v4(), text: v.value })),
-                    location_address: state.address,
                     location: state.location ? {
+                        id: state.location.place_id,
+                        place_id: state.location.place_id,
+                        address: state.location.address,
                         coords: {
-                            latitude: state.location.coords.latitude,
-                            longitude: state.location.coords.longitude,
-                            accuracy: state.location.coords.accuracy,
-                            altitude: state.location.coords.altitude,
-                            heading: state.location.coords.heading,
-                            altitudeAccuracy: state.location.coords.altitudeAccuracy,
-                            speed: state.location.coords.speed,
-                        }, timestamp: state.location.timestamp
+                            latitude: state.location.coords.latitude || null,
+                            longitude: state.location.coords.longitude || null,
+                            accuracy: state.location.coords.accuracy || null,
+                            altitude: state.location.coords.altitude || null,
+                            heading: state.location.coords.heading || null,
+                            altitudeAccuracy: state.location.coords.altitudeAccuracy || null,
+                            speed: state.location.coords.speed || null,
+                        }, timestamp: state.location.timestamp || Date.now()
                     } : undefined,
                     job_description: state.description
                 }
+                if (state.manualAddress && !state.address) {
+                    throw new Error('You must provide your address manually!')
+                } else if (state.manualAddress) {
+                    newJob.location.address = state.address
+                }
+
+                console.log(newJob)
+
                 if (newJob.job_type && !validator.isEmpty(newJob.job_type) && !types.jobTypes.find(type => type === newJob.job_type)) {
                     // Job type is new. 
-                    // Add to the list of job types.
-                    await Job.addJobType(ctx, newJob.job_type)
+                    throw new Error('Invalid job type!')
                 }
 
                 await Job.addNewJob(ctx, newJob, photos)
@@ -290,10 +349,24 @@ export function CreateJob({ onClose, show, onComplete }) {
                         <div className='container is-fluid pb-4 px-0'>
                             <div className='columns mx-0 px-4'>
                                 <div className='column is-6'>
-                                    <FormField required disabled={state.loading} value={state.type} tagifyRef={tagifyRef} tags whitelist={types.jobTypes} onChange={(type) => setState((state) => ({ ...state, type }))} className='' containerClassName='mb-4' label="Job Type" placeholder='Begin typing a job type' type='text' icon={<FaSearch />} helpTextLeft='Search and select a job type to improve search results when finding a contractor' />
+                                    <FormField required disabled={state.loading} maxLength={types.jobTypes.length} value={state.type} tagifyRef={tagifyRef} tags whitelist={types.jobTypes} onChange={(type) => { setState((state) => ({ ...state, type })) }} className='' containerClassName='mb-4' label="Job Type" placeholder='Begin typing a job type' type='text' icon={<FaSearch />} helpTextLeft='Search and select a job type to improve search results when finding a contractor' />
                                     <FormField required disabled={state.loading} value={state.title} onChange={(title) => setState({ ...state, title })} className='' containerClassName='my-4' label="Title" placeholder='Provide a title for the job' type='text' icon={null} helpTextLeft='Will be seen by contractors in search result and as an active status' helpTextRight='Maximum 30 characters' maxLength={30} />
                                     <FormField required disabled={state.loading} value={state.description} onChange={(description) => setState({ ...state, description })} className='' containerClassName='my-4' label="Description" isTextArea placeholder='Provide a description of the job' type='text' icon={null} helpTextLeft='Give a short description to improve finding a contractor that fits the job' helpTextRight='Maximum 80 characters' maxLength={80} />
-                                    <FormField required={!state.manualAddress} disabled={state.loading || state.fetchingLocation} value={state.address} tagifyRef={tagifyRef2} tags={!state.manualAddress} whitelist={types.location} onChange={(address) => setState((state) => ({ ...state, address }))} className='' containerClassName='my-4' label="Location Address" placeholder='Begin typing the first line of the address' type='text' icon={<FaMapMarkerAlt />}
+                                    <FormField locationAutocomplete={!state.manualAddress} required={!state.manualAddress} disabled={state.loading || state.fetchingLocation} value={state.address} onChange={(e) => {
+                                        if (state.manualAddress) {
+                                            return setState({ ...state, address: e })
+                                        }
+                                        const { address, coords, place_id } = e
+                                        setState((state) => ({
+                                            ...state,
+                                            location: {
+                                                address,
+                                                place_id,
+                                                id: place_id,
+                                                coords
+                                            },
+                                        }))
+                                    }} className='' containerClassName='my-4' label="Location Address" placeholder='Begin typing the first line of the address' type='text' icon={<FaMapMarkerAlt />}
                                         hasAddons addon={(
                                             <div className='control'>
                                                 <button disabled={state.loading || state.fetchingLocation} className={`button ${state.fetchingLocation ? 'is-loading' : ''} ${state.manualAddress ? 'is-info has-text-white' : ''}`} onClick={async () => {

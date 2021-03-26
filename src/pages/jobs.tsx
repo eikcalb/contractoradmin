@@ -18,7 +18,15 @@ export function Jobs() {
     const { addToast } = useToasts()
     const location = useLocation()
 
-    const removeEscapeHandler = useEscapeHandler(() => setState({ ...state, showModal: false }))
+    const dismissModal = () => {
+        setState({ ...state, showModal: false })
+        const containers = window.document.getElementsByClassName('pac-container')
+        for (let i; i < containers.length; i++) {
+            containers.item(i)?.remove()
+        }
+    }
+
+    const removeEscapeHandler = useEscapeHandler(dismissModal)
 
     useEffect(() => {
         return removeEscapeHandler()
@@ -94,8 +102,8 @@ export function Jobs() {
             }}
                 job={id ? state.selected : null} className='column is-9 is-12-touch is-12-mobile is-flex' />
             {state.showModal ?
-                <CreateJob show={state.showModal} onClose={() => setState({ ...state, showModal: false })} onComplete={() => {
-                    setState({ ...state, showModal: false })
+                <CreateJob show={state.showModal} onClose={dismissModal} onComplete={() => {
+                    dismissModal()
                 }} />
                 : null}
         </div>

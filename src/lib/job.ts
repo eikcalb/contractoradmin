@@ -7,6 +7,8 @@ import { Application } from ".";
 
 export const JOB_MILE_RADIUS = 10
 
+const JOB_TYPES = ["Alarm Systems/Cameras", "Animal Grooming", "Auto Mechanic", "Baby Sitters/Nanny", "Beautician", "Cable/Satellite Installation", "Car Detailing", "Carpenter", "Carpet Cleaning", "Caterers", "Computer Repair", "Debris Removal", "Demolition", "Dump Truck Services", "Electrician", "Engineering", "Event Planner", "Flooring", "Garage Door Installation/Repair", "HVAC (Heating & Air Conditioning)", "Healthcare professionals", "Hot Shot Delivery & Courier Services", "IT Tech Support", "Janitorial/Maid/Cleaning Services", "Lawn care", "Masonry (Brick, Concrete)", "Modeling/Acting", "Networking Installation", "Painter/Finish", "Plumber", "Roof Repair", "Seamstress/Tailor", "Shipping Pallets, Containers and Custom Crate Builders", "Snow and Ice Removal", "Tow Truck and Roadside Assistance", "Tree Services", "Veterinarian Services", "Web Designer", "Window Blinds, Shades, Drapes, Curtains and Shutters"]
+
 export interface IJob {
     id
     coordinates: firebase.firestore.GeoPoint
@@ -28,6 +30,9 @@ export interface IJob {
             speed: number
         }
         timestamp
+        address
+        place_id
+        id
     }
     location_address: any
     posted_by: string
@@ -58,23 +63,9 @@ export interface IJobHistory {
 
 export class Job {
     private static db = geoFirestore.collection('jobs')
-    private static types = geoFirestore.collection('types')
 
     static async getJobTypes(app: Application) {
-        return Job.types.doc('jobs').get().then(async snap => {
-            let types
-            if (snap.exists) {
-                types = snap.data()!.types
-            }
-            return Promise.resolve(types || [])
-        })
-    }
-
-    static async addJobType(app: Application, type: string) {
-        type = type.toLowerCase()
-        return Job.types.doc('jobs').update({
-            types: firebase.firestore.FieldValue.arrayUnion(type)
-        })
+        return JOB_TYPES
     }
 
     static async addNewJob(app: Application, job, photos: File[] = []) {
@@ -97,7 +88,7 @@ export class Job {
         job.coordinates = new firebase.firestore.GeoPoint(job.location.coords.latitude, job.location.coords.longitude)
 
         const newDoc = Job.db.doc()
-        let photo_files
+        let photo_files = null
 
         if (photos && photos.length > 0) {
             // If photo is selected, add the photo
@@ -171,9 +162,9 @@ export class Job {
     }
 
     static listenForActiveAndPendingJobs(callback, limit = 100) {
-        const unsubscribe = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).limit(limit).onSnapshot(async snap => {
+        const unsubscribe = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(limit).onSnapshot(async snap => {
             const jobs: IJob[] = [];
-            (snap.native as firebase.firestore.QuerySnapshot).forEach(doc => {
+            (snap as firebase.firestore.QuerySnapshot).forEach(doc => {
                 const item: any = doc.data()
                 item.id = doc.id
                 if (item.location?.address) {
@@ -188,9 +179,9 @@ export class Job {
     }
 
     static listenForActiveJobs(callback, limit = 9) {
-        const unsubscribe = Job.db.where('status', 'in', ["in review", "accepted", "in progress"]).limit(limit).onSnapshot(async snap => {
+        const unsubscribe = Job.db.where('status', 'in', ["in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(limit).onSnapshot(async snap => {
             const jobs: IJob[] = [];
-            (snap.native as firebase.firestore.QuerySnapshot).forEach(doc => {
+            (snap as firebase.firestore.QuerySnapshot).forEach(doc => {
                 const item: any = doc.data()
                 item.id = doc.id
                 if (item.location?.address) {

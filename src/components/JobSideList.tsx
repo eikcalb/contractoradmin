@@ -8,10 +8,10 @@ import { JobItem } from './job';
 
 export function JobSideList({ className, activeJobs, inactiveJobs, onCreateNew }) {
     return (
-        <div className={`${className} panel job-panel has-background-white-ter is-flex`}>
+        <div className={`${className} panel job-panel has-background-white-ter is-flex is-size-7`}>
             <div className='panel-heading is-flex is-vcentered'>
-                <p className='has-text-left'>Job Listings</p>
-                <a className='button is-small is-rounded' onClick={onCreateNew}><BsPencilSquare /></a>
+                <p className='has-text-left is-size-6'>Job Listings</p>
+                <a className='button is-small is-rounded is-size-7' onClick={onCreateNew}><BsPencilSquare /></a>
             </div>
             <div className='panel-block'>
                 <div className='field has-addons' style={{ flex: 1 }}>

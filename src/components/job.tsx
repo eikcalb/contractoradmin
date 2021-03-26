@@ -229,12 +229,10 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
                     <span className='px-4 py-4 is-flex is-flex-centered'>Searching for deployees within {JOB_MILE_RADIUS} mile radius from you</span>
                 </div>
                 :
-                <figure className='image is-16by9' style={{ position: 'relative', paddingTop: '30%' }}>
-                    <img src={'https://via.placeholder.com/728x90.png'} />
-                    <a className='button is-large' style={{ position: 'absolute', bottom: 4, right: 4, background: 'transparent', border: 0 }}>
-                        <span className='icon is-size-2'><FaExpandAlt /></span>
-                    </a>
-                </figure>
+                job.status === 'in review' ?
+                    <JobReview job={job} />
+                    :
+                    <MapView zoom={15} zoomControl={false} vertical={false} job={job} className='container pb-0 is-flex' />
             }
             <div className='is-flex py-4' style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
                 <div className='section py-2 pb-3'>
@@ -317,7 +315,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                              */}
                             </p>
                             <p className='is-size-7'>{job.user?.profileBio}</p>
-                            <p className='has-text-left has-text-grey-light is-size-7'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar()}</p>
+                            <p className='has-text-left has-text-grey-light is-size-8'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar()}</p>
                         </div>
                     </div>
                 </div>
@@ -347,6 +345,49 @@ export function JobDetailUser({ job }: { job: IJob }) {
                     </tbody>
                 </table>
                 <button className='button is-info is-uppercase mx-4' style={{ alignSelf: 'flex-start' }}>Message</button>
+            </div>
+        </div>
+    )
+}
+
+
+export function JobReview({ job }: { job: IJob }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
+    let startTime
+    if (job.date_created) startTime = moment(job.date_created.toMillis())
+
+    return (
+        <div className='section pt-5 is-flex is-clipped' style={{ flexDirection: 'column' }} >
+            <div className='columns is-paddingless'>
+                <div className='content column is-narrow is-size-6 has-text-centered px-4'>
+                    <span className='is-flex is-flex-centered'>Deployee Found</span>
+                </div>
+                <div className='columns column is-vcentered'>
+                    <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
+                        <figure className='image is-80x80 is-flex'>
+                            <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} />
+                        </figure>
+                    </div>
+                    <div className='column'>
+                        <div className='container'>
+                            <div className='columns is-marginless is-vcentered is-mobile'>
+                                <div className='column pb-0 pl-0'>
+                                    <p className='is-size-6 has-text-left has-text-weight-bold'>{`${job.user?.firstName || "John"} ${job.user?.lastName || 'Doe'}`}</p>
+                                </div>
+                                <div className="column is-narrow has-text-right has-text-info pr-0 pb-0 is-size-7">View Profile</div>
+                            </div>
+                            <div className='content has-text-left'>
+                                <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user?.starRate}
+                                    {/* TODO: should option of remote or onsite be present?
+                             &nbsp;{generateUserJobType(DUMMY_USER)} 
+                             */}
+                                </p>
+                                <p className='is-size-7'>{job.user?.profileBio}</p>
+                                <p className='has-text-left has-text-grey-light is-size-7'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar()}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     )
