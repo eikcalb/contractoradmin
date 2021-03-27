@@ -131,8 +131,12 @@ export class Job {
         return true
     }
 
-    static async getInactiveJobs(limit = 20) {
-        return Job.db.where('status', '==', "complete").native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
+    static async getInactiveJobs(ctx: Application, limit = 20) {
+        let query = Job.db.where('status', '==', 'complete')
+        // if (ctx.user?.role !== 'admin') {
+        //     query.where('posted_by', '==', ctx.user?.id)
+        // }
+        return query.native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
             const jobs: IJob[] = []
             snap.forEach(doc => {
                 const item: any = doc.data()
@@ -146,8 +150,12 @@ export class Job {
         })
     }
 
-    static async getActiveJobs(limit = 20) {
-        return Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
+    static async getActiveJobs(ctx: Application, limit = 20) {
+        let query = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"])
+        // if (ctx.user?.role !== 'admin') {
+        //     query.where('posted_by', '==', ctx.user?.id)
+        // }
+        return query.native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
             const jobs: IJob[] = []
             snap.forEach(async doc => {
                 const item: any = doc.data()
@@ -161,8 +169,12 @@ export class Job {
         })
     }
 
-    static listenForActiveAndPendingJobs(callback, limit = 100) {
-        const unsubscribe = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(limit).onSnapshot(async snap => {
+    static listenForActiveAndPendingJobs(ctx: Application, callback, limit = 100) {
+        let query = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"])
+        // if (ctx.user?.role !== 'admin') {
+        //     query.where('posted_by', '==', ctx.user?.id)
+        // }
+        const unsubscribe = query.native.orderBy('date_created', 'desc').limit(limit).onSnapshot(async snap => {
             const jobs: IJob[] = [];
             (snap as firebase.firestore.QuerySnapshot).forEach(doc => {
                 const item: any = doc.data()
@@ -178,8 +190,12 @@ export class Job {
         return unsubscribe
     }
 
-    static listenForActiveJobs(callback, limit = 9) {
-        const unsubscribe = Job.db.where('status', 'in', ["in review", "accepted", "in progress"]).native.orderBy('date_created', 'desc').limit(limit).onSnapshot(async snap => {
+    static listenForActiveJobs(ctx: Application, callback, limit = 9) {
+        let query = Job.db.where('status', 'in', ["in review", "accepted", "in progress"])
+        // if (ctx.user?.role !== 'admin') {
+        //     query.where('posted_by', '==', ctx.user?.id)
+        // }
+        const unsubscribe = query.native.orderBy('date_created', 'desc').limit(limit).onSnapshot(async snap => {
             const jobs: IJob[] = [];
             (snap as firebase.firestore.QuerySnapshot).forEach(doc => {
                 const item: any = doc.data()
@@ -195,12 +211,16 @@ export class Job {
         return unsubscribe
     }
 
-    static listenForActiveJobsWithChangeHandler({ added, modified, removed }: {
+    static listenForActiveJobsWithChangeHandler(ctx: Application, { added, modified, removed }: {
         added: (data: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>) => any,
         modified: (data: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>) => any,
         removed: (data: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>) => any
     }) {
-        const unsubscribe = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"]).limit(6).onSnapshot(async snap => {
+        let query = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"])
+        // if (ctx.user?.role !== 'admin') {
+        //     query.where('posted_by', '==', ctx.user?.id)
+        // }
+        const unsubscribe = query.limit(6).onSnapshot(async snap => {
             (snap.native as firebase.firestore.QuerySnapshot).docChanges().forEach(change => {
                 switch (change.type) {
                     case 'added':

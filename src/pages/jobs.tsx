@@ -34,7 +34,7 @@ export function Jobs() {
 
     useEffect(() => {
         setState({ ...state, loading: true });
-        const unsubscribe = Job.listenForActiveAndPendingJobs(async (err, docs: IJob[]) => {
+        const unsubscribe = Job.listenForActiveAndPendingJobs(ctx, async (err, docs: IJob[]) => {
             if (err) {
                 setState({ ...state, loading: false });
                 return addToast(err.message || 'Failed to get jobs!');
@@ -51,7 +51,7 @@ export function Jobs() {
             setActive(docs)
         })
 
-        Job.getInactiveJobs().then(async (jobs) => await jobs.map(async (v: IJob) => {
+        Job.getInactiveJobs(ctx).then(async (jobs) => await jobs.map(async (v: IJob) => {
             v.user = await User.getExternalUser(ctx, v.executed_by);
             return v;
         })).then(jobs => {
@@ -80,7 +80,6 @@ export function Jobs() {
         if (id) {
             if (activeMatch) {
                 const selected = active.find(v => v.id === id)
-                console.log(id, 'active: ', activeMatch, inactiveMatch, 'selected: ', selected)
                 setState({ ...state, selected: selected || null })
             } else if (inactiveMatch) {
                 const selected = inactive.find(v => v.id === id)
@@ -91,7 +90,7 @@ export function Jobs() {
 
     return (
         <div className='columns is-gapless px-4 py-4 is-fullheight is-multiline'>
-            <JobSideList activeJobs={active} inactiveJobs={inactive} onCreateNew={() => setState({ ...state, showModal: true })} className='column is-3 is-12-mobile is-12-touch is-clipped is-fullheight' />
+            <JobSideList isActive={!!activeMatch} activeJobs={active} inactiveJobs={inactive} onCreateNew={() => setState({ ...state, showModal: true })} className='column is-3 is-12-mobile is-12-touch is-clipped is-fullheight' />
             <JobDetail onCancel={(job: IJob) => {
                 if (job.status === 'complete') {
                     setInactive(inactive.filter(v => v.id !== job.id))

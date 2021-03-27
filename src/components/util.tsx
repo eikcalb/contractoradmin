@@ -1,17 +1,17 @@
-import React, { ReactChild, useEffect, useState, useContext } from 'react'
+import React, { ReactChild, useEffect, useState, useContext, HTMLAttributes } from 'react'
 import { FaExclamationCircle } from 'react-icons/fa';
 import { Loader } from '@googlemaps/js-api-loader';
 import { APPLICATION_CONTEXT } from '../lib';
 
-export function Empty({ content, icon, onDismiss, text, ...props }: { text?: string, content?: ReactChild, icon?: ReactChild, onDismiss?: any, children?: ReactChild }) {
+export function Empty({ content, icon, onDismiss, children, text, ...props }: { text?: string, content?: ReactChild, icon?: ReactChild, onDismiss?: any, children?: ReactChild } & HTMLAttributes<HTMLDivElement>) {
     return (
-        <div className='notification px-4 is-light is-uppercase is-warning has-text-centered'>
+        <div {...props} className={`notification px-4 is-light is-uppercase is-warning has-text-centered ${props.className}`}>
             {!!onDismiss && <button onClick={onDismiss} className='delete'></button>}
             {icon ? icon :
                 <FaExclamationCircle className='has-text-warning-dark is-size-4 mb-2' />
             }
-            {props.children ?
-                props.children :
+            {children ?
+                children :
                 content ? content :
                     <p className='block has-text-grey is-size-7'>{text || 'No data'}</p>
             }
@@ -75,6 +75,12 @@ export function useLoadGoogleMaps() {
     return loading
 }
 
+/**
+ * 
+ * @param func Function to debounce
+ * @param wait Miliseconds delay for debounce
+ * @param immediate Set to true to trigger immediately and kill other attempts
+ */
 export function debounce(func, wait: number, immediate: boolean = false) {
     var timeout;
     return async (...args) => {

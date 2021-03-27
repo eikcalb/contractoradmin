@@ -15,7 +15,7 @@ export function JobList({ className }: { className?: string; }) {
 
     useEffect(() => {
         setState({ ...state, loading: true });
-        const unsubscribe = Job.listenForActiveJobs(async (err, docs: IJob[]) => {
+        const unsubscribe = Job.listenForActiveJobs(ctx, async (err, docs: IJob[]) => {
             if (err) {
                 setState({ ...state, loading: false });
                 return addToast(err.message || 'Failed to get jobs!');

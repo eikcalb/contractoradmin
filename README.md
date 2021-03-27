@@ -2,6 +2,8 @@
 
 ## Todo
 
+- Offer negotiation
+
 - How to resolve path to get job author profile picture.
     + concatenate
 - How to transition state of jobs.
