@@ -39,7 +39,7 @@ export function JobList({ className }: { className?: string; }) {
             {state.loading ?
                 <progress className="progress is-small is-info my-6" max="100">loading</progress>
                 : state.jobs.map(j => (
-                    <Link key={j.id} to={`${links.activeJobs}/${j.id}`} className='column is-4-fullhd is-6-desktop is-12-touch list-item'>
+                    <Link key={j.id} to={`${links.activeJobs}/${j.id}`} className={`column ${state.jobs.length == 1 ? 'is-12' : 'is-4-fullhd is-6-desktop is-12-touch'} list-item`}>
                         <JobListItem job={j} />
                     </Link>
                 ))}

@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import moment from 'moment'
+import moment from 'moment';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { FaCaretDown, FaCaretUp } from "react-icons/fa";
-import { NavLink, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import { APPLICATION_CONTEXT } from '../lib';
+import { IPayment, Payment, PAYMENT_PAGE_LIMIT } from "../lib/payment";
 import { Empty } from './util';
-
-const CurrencyFormatter = Intl.NumberFormat('en-US', { currency: 'USD', style: 'currency', maximumFractionDigits: 2 })
 
 export function PaymentItem({ payment }: { payment: IPayment }) {
     const time = moment.unix(payment.timestamp / 1000)
@@ -21,7 +21,7 @@ export function PaymentItem({ payment }: { payment: IPayment }) {
             </div>
             <div className='content'>
                 <p>
-                    {getPaymentDescription(payment)}
+                    {Payment.getPaymentDescription(payment)}
                 </p>
             </div>
         </div>
@@ -29,7 +29,24 @@ export function PaymentItem({ payment }: { payment: IPayment }) {
 }
 
 export function PaymentList({ className }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
     const [expanded, setExpanded] = useState(true)
+    const [payments, setPayments] = useState<IPayment[]>([DUMMY_PAYMENTS[0]])
+    const fetchPayment = useCallback(async () => {
+        try {
+            const pageToFetch = Math.max(0, Math.floor(payments.length / PAYMENT_PAGE_LIMIT)) + 1
+            // This loads the specified page limit and includes count of imcomplete previous page
+            const limit = PAYMENT_PAGE_LIMIT + (PAYMENT_PAGE_LIMIT - (payments.length % PAYMENT_PAGE_LIMIT))
+            const paymentData = await Payment.getTransactions(ctx, pageToFetch, limit)
+            setPayments([...payments, ...paymentData])
+        } catch (e) {
+            console.log(e, 'failed to fetch payment data')
+        }
+    }, [payments])
+
+    useEffect(() => {
+        fetchPayment()
+    }, [ctx.user, ctx.user?.id])
 
     return (
         <nav className={className} >
@@ -44,8 +61,8 @@ export function PaymentList({ className }) {
                     </button>
                 </div>
                 <div style={{ transition: "all 0.500s linear" }} className={`${!expanded ? 'is-height-0' : ''}`}>
-                    {DUMMY_PAYMENTS.length > 0 ?
-                        DUMMY_PAYMENTS.map(p => (
+                    {payments.length > 0 ?
+                        payments.map(p => (
                             <Link to={`/ f`} key={p.id} className='panel-block'>
                                 <PaymentItem payment={p} />
                             </Link>
@@ -59,28 +76,9 @@ export function PaymentList({ className }) {
     )
 }
 
-export interface IPayment {
-    type: 'pending' | 'paid'
-    timestamp
-    cost: number
-    title
-    payee
-    id: string
-}
-
-export function getPaymentDescription(payment: IPayment): string {
-    switch (payment.type) {
-        case 'pending':
-            return `You have a pending charge of ${CurrencyFormatter.format(payment.cost)} for the completion of this job by ${payment.payee}`
-        case 'paid':
-            return `A payment of ${CurrencyFormatter.format(payment.cost)} has been submitted to ${payment.payee}`
-    }
-}
-
-
 export const DUMMY_PAYMENTS: IPayment[] = [
     {
-        type: 'pending',
+        status: 'pending',
         timestamp: Date.now(),
         cost: 20.405,
         title: 'Clear lawn',
@@ -88,7 +86,7 @@ export const DUMMY_PAYMENTS: IPayment[] = [
         id: '2ss354'
     },
     {
-        type: 'paid',
+        status: 'paid',
         timestamp: Date.now(),
         cost: 200.405,
         title: 'Clear lawn and take out firewood',
@@ -96,7 +94,7 @@ export const DUMMY_PAYMENTS: IPayment[] = [
         id: '23sss54'
     },
     {
-        type: 'pending',
+        status: 'pending',
         timestamp: Date.now(),
         cost: 3000.405,
         title: 'Clear lawn',

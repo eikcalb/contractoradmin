@@ -1,10 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { JobList } from "../components/JobList";
 import { NotificationList } from '../components/notification';
 import { PaymentList } from '../components/payment';
-import { UserList } from '../components/user';
 import { CardFragment } from "../components/util";
-import { Link } from 'react-router-dom';
 import links from '../lib/links';
 
 export function Dashboard() {

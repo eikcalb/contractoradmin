@@ -53,8 +53,8 @@ export function NotificationList({ className }) {
                 </div>
                 <div style={{ transition: "all 0.500s linear" }} className={`${!expanded ? 'is-height-0' : ''}`}>
                     {DUMMY_NOTIFICATIONS.length > 0 ?
-                        DUMMY_NOTIFICATIONS.map(n => (
-                            <Link key={n.id} to={`/f`} className='panel-block'>
+                        [...DUMMY_NOTIFICATIONS, ...DUMMY_NOTIFICATIONS, ...DUMMY_NOTIFICATIONS].map((n, index) => (
+                            <Link key={`${n.id}-${index}`} to={`/f`} className='panel-block'>
                                 <NotificationItem notification={n} />
                             </Link>
                         ))
