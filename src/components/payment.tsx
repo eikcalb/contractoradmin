@@ -31,7 +31,7 @@ export function PaymentItem({ payment }: { payment: IPayment }) {
 export function PaymentList({ className }) {
     const ctx = useContext(APPLICATION_CONTEXT)
     const [expanded, setExpanded] = useState(true)
-    const [payments, setPayments] = useState<IPayment[]>([DUMMY_PAYMENTS[0]])
+    const [payments, setPayments] = useState<IPayment[]>([])
     const fetchPayment = useCallback(async () => {
         try {
             const pageToFetch = Math.max(0, Math.floor(payments.length / PAYMENT_PAGE_LIMIT)) + 1

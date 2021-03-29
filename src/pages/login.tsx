@@ -5,7 +5,6 @@ import { VIEW_CONTEXT } from '../lib';
 
 export function Login() {
     const viewCTX = useContext(VIEW_CONTEXT)
-    const [state, setState] = useState({ showModal: false })
 
     useEffect(() => {
         viewCTX.showToolbar(false)

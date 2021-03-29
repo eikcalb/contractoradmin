@@ -1,6 +1,8 @@
 import { IJobHistory } from "./job";
 import { IEducationHistory, ILicense } from "./education";
 import { Application } from ".";
+import { geoFirestore } from "./firebase";
+import { INotification } from "../components/notification";
 
 export const DUMMY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZjdlMDFmOTBiMjRmNzAwMTcyZmRkOTQiLCJlbWFpbCI6Inp6QGdtYWlsLmNvbSIsInBob25lX251bWJlciI6IisyMzQ4MDgzODIxNzgyIiwiaWF0IjoxNjE1NjYzNDQ4fQ.nHEwobqCa4yT1z27ydwpSHPg_6s4CEp1QarlJGU1HUo"
 export const DUMMY_TOKEN_SECRET = "secret"
@@ -140,6 +142,37 @@ export class User extends AppUser {
             console.log('failed to fetch user data', e)
             return new User({})
         }
+    }
+
+    static async getComments(id: string): Promise<{ text: string, first_name: string, last_name: string }[]> {
+        if (!id) {
+            return []
+        }
+        const snap = await geoFirestore.collection('comments').doc(id).collection('messages').get()
+        const docs: { text: string, first_name: string, last_name: string }[] = []
+        snap.forEach(({ text, first_name, last_name }: any) => docs.push({ text, first_name, last_name }))
+        return docs
+    }
+
+
+    static listenForNotifications(ctx: Application, callback = (err: Error | null, noop?: INotification[] | null) => { }, limit = 100) {
+        let query = geoFirestore.collection('notifications')
+
+        // TODO: limit notifications displayed to non-admin
+        const unsubscribe = query.native.orderBy('dateCreated', 'desc').limit(limit).onSnapshot(async snap => {
+            const notifications: INotification[] = [];
+            (snap).forEach(doc => {
+                const item: any = doc.data()
+                item.id = doc.id
+                if (item.location?.address) {
+                    item.location_address = item.location.address
+                }
+                notifications.push(item)
+            })
+            callback(null, notifications)
+        }, err => callback(err, null))
+
+        return unsubscribe
     }
 }
 

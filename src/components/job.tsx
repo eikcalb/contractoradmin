@@ -2,7 +2,7 @@ import moment, { unix } from 'moment'
 import React, { useCallback, useState, useContext } from 'react'
 import { FaExpandAlt, FaStar, FaMapMarkerAlt, FaGlobeAfrica, FaClipboardList, FaHardHat, FaCaretRight, FaArrowRight, FaChevronRight } from 'react-icons/fa'
 import { ImSpinner } from "react-icons/im";
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import { STYLES } from '../lib/theme'
 import { DUMMY_USER, User } from '../lib/user'
 import { IJob, Job, JOB_MILE_RADIUS } from '../lib/job'
@@ -11,6 +11,7 @@ import { useToasts } from 'react-toast-notifications';
 import { wait } from './util';
 import { APPLICATION_CONTEXT } from '../lib';
 import { MapView } from './map';
+import links from '../lib/links';
 
 export function JobListItem({ job }: { job: IJob }) {
     const ctx = useContext(APPLICATION_CONTEXT)
@@ -48,7 +49,7 @@ export function JobListItem({ job }: { job: IJob }) {
                                     <div className='title is-6'>{`${job.user?.firstName} ${job.user?.lastName}`}</div>
                                 </div>
                                 <div className='column has-text-right'>
-                                    {time.calendar()}
+                                    {time.calendar({ sameElse: 'DD/MMM/YYYY' })}
                                 </div>
                             </div>
                         </div>
@@ -97,7 +98,7 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
                             <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user?.starRate}</p>
                         </div>
                         <div className='column has-text-grey has-text-right'>
-                            {time.calendar()}
+                            {time.calendar({ sameElse: 'DD/MMM/YYYY' })}
                         </div>
                     </div>
 
@@ -105,7 +106,7 @@ export function JobItem({ job, to }: { job: IJob, to: any }) {
                 <div className='columns mb-0 is-vcentered has-text-grey is-mobile' style={{ flexDirection: 'column', flex: 1 }}>
                     <div className='column is-12'>
                         {job.progress && job.progress >= 100 ? (
-                            <p>Completed {endTime.calendar()}</p>
+                            <p>Completed {endTime.calendar({ sameElse: 'DD/MMM/YYYY' })}</p>
                         ) :
                             <progress className="progress is-info" style={STYLES.jobProgressBar} value={job.progress || 0} max="100">{job.progress}</progress>
                         }
@@ -169,7 +170,7 @@ export function JobDetail({ job, className, onCancel }: { onCancel: (job: IJob) 
         <div className={`${className} card job-detail is-size-6`} style={{ flexDirection: 'column' }}>
             <div className='card-content is-paddingless'>
                 <div className='level py-4 mb-0'>
-                    <div className='level-item is-size-7'>POSTED {time.calendar()}</div>
+                    <div className='level-item is-size-7'>POSTED {time.calendar({sameElse:'DD/MMM/YYYY'})}</div>
                     <div className='level-item is-size-6 has-text-weight-bold'>{job.job_title}</div>
                     <div className='level-item is-size-7 has-text-grey'>{job.id}</div>
                 </div>
@@ -264,11 +265,11 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
                                 : null}
                             <tr className='is-flex has-text-left'>
                                 <td style={{ flex: 1 }} className='has-text-grey'> START</td>
-                                <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar() || `-`}</td>
+                                <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar({sameElse:'DD/MMM/YYYY'}) || `-`}</td>
                             </tr>
                             <tr className='is-flex has-text-left'>
                                 <td style={{ flex: 1 }} className='has-text-grey'>END</td>
-                                <td style={{ flex: 2 }} className=' has-text-left'>{endTime?.calendar() || `-`}</td>
+                                <td style={{ flex: 2 }} className=' has-text-left'>{endTime?.calendar({sameElse:'DD/MMM/YYYY'}) || `-`}</td>
                             </tr>
                             <tr className='is-flex has-text-left'>
                                 <td style={{ flex: 1 }} className='has-text-grey'>TOTAL TIME</td>
@@ -304,9 +305,9 @@ export function JobDetailUser({ job }: { job: IJob }) {
                     <div className='container'>
                         <div className='columns is-marginless is-vcentered is-mobile'>
                             <div className='column pb-0 pl-0'>
-                                <p className='is-size-6 has-text-left has-text-weight-bold'>{`${job.user?.firstName || "John"} ${job.user?.lastName || 'Doe'}`}</p>
+                                <p className='is-size-6 has-text-left has-text-weight-bold'>{`${job.user?.firstName} ${job.user?.lastName}`}</p>
                             </div>
-                            <div className="column is-narrow has-text-right has-text-info pr-0 pb-0 is-size-7">View Profile</div>
+                            <Link to={{ pathname: `${links.profile}/${job.user!.id}`, state: { user: job.user } }} className="column is-narrow has-text-right has-text-link pr-0 pb-0 is-size-7">View Profile</Link>
                         </div>
                         <div className='content has-text-left'>
                             <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{job.user?.starRate}
@@ -315,7 +316,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                              */}
                             </p>
                             <p className='is-size-7'>{job.user?.profileBio}</p>
-                            <p className='has-text-left has-text-grey-light is-size-8'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar()}</p>
+                            <p className='has-text-left has-text-grey-light is-size-8'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar({sameElse:'DD/MMM/YYYY'})}</p>
                         </div>
                     </div>
                 </div>
@@ -333,7 +334,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                         </tr> */}
                         <tr className='is-flex has-text-left'>
                             <td style={{ flex: 1 }} className='has-text-grey'>START TIME</td>
-                            <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar()}</td>
+                            <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar({sameElse:'DD/MMM/YYYY'})}</td>
                         </tr>
                         <tr className='is-flex has-text-left'>
                             <td style={{ flex: 1 }} className='has-text-grey'>HIGHLIGHTED SKILLS AND LICENSES</td>
@@ -344,7 +345,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                         </tr>
                     </tbody>
                 </table>
-                <button className='button is-info is-uppercase mx-4' style={{ alignSelf: 'flex-start' }}>Message</button>
+                <Link to={`${links.messages}/${job.user!.id}`} className='button is-info is-uppercase mx-4' style={{ alignSelf: 'flex-start' }}>Message</Link>
             </div>
         </div>
     )
@@ -383,7 +384,7 @@ export function JobReview({ job }: { job: IJob }) {
                              */}
                                 </p>
                                 <p className='is-size-7'>{job.user?.profileBio}</p>
-                                <p className='has-text-left has-text-grey-light is-size-7'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar()}</p>
+                                <p className='has-text-left has-text-grey-light is-size-7'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar({sameElse:'DD/MMM/YYYY'})}</p>
                             </div>
                         </div>
                     </div>

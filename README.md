@@ -3,6 +3,11 @@
 ## Todo
 
 - Offer negotiation
+- User review badges
+  - Compliments
+  - Achievments
+
+---
 
 - How to resolve path to get job author profile picture.
     + concatenate

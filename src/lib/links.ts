@@ -16,6 +16,7 @@ export default {
     privacyPolicy: '/privacyPolicy',
     termsOfService: '/terms',
     profile: '/profile',
+    _profile: '/profile/:id',
     helpCenter: '/help',
     logout: '/logout',
     settings: '/settings',

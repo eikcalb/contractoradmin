@@ -61,7 +61,7 @@ export default function Toolbar() {
                             {`${ctx.user?.firstName} ${ctx.user?.lastName}`}
                         </span>
                         <div className='navbar-dropdown'>
-                            <Link to={links.profile} className='navbar-item'>Profile</Link>
+                            <Link to={{pathname:`${links.profile}/${ctx.user?.id}`}} className='navbar-item'>Profile</Link>
                             <Link to={links.helpCenter} className='navbar-item'>Help Center</Link>
                             <Link to={links.logout} className='navbar-item'>Sign Out</Link>
                         </div>

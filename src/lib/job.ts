@@ -134,7 +134,7 @@ export class Job {
     static async getInactiveJobs(ctx: Application, limit = 20) {
         let query = Job.db.where('status', '==', 'complete')
         // if (ctx.user?.role !== 'admin') {
-        //     query.where('posted_by', '==', ctx.user?.id)
+        //    query =  query.where('posted_by', '==', ctx.user?.id)
         // }
         return query.native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
             const jobs: IJob[] = []
@@ -153,7 +153,7 @@ export class Job {
     static async getActiveJobs(ctx: Application, limit = 20) {
         let query = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"])
         // if (ctx.user?.role !== 'admin') {
-        //     query.where('posted_by', '==', ctx.user?.id)
+        //    query =  query.where('posted_by', '==', ctx.user?.id)
         // }
         return query.native.orderBy('date_created', 'desc').limit(limit).get().then(async snap => {
             const jobs: IJob[] = []
@@ -193,7 +193,7 @@ export class Job {
     static listenForActiveJobs(ctx: Application, callback, limit = 9) {
         let query = Job.db.where('status', 'in', ["in review", "accepted", "in progress"])
         // if (ctx.user?.role !== 'admin') {
-        //     query.where('posted_by', '==', ctx.user?.id)
+        //     query = query.where('posted_by', '==', ctx.user?.id)
         // }
         const unsubscribe = query.native.orderBy('date_created', 'desc').limit(limit).onSnapshot(async snap => {
             const jobs: IJob[] = [];
@@ -218,7 +218,7 @@ export class Job {
     }) {
         let query = Job.db.where('status', 'in', ["available", "in review", "accepted", "in progress"])
         // if (ctx.user?.role !== 'admin') {
-        //     query.where('posted_by', '==', ctx.user?.id)
+        //     query = query.where('posted_by', '==', ctx.user?.id)
         // }
         const unsubscribe = query.limit(6).onSnapshot(async snap => {
             (snap.native as firebase.firestore.QuerySnapshot).docChanges().forEach(change => {

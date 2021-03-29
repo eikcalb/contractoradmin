@@ -14,8 +14,10 @@ import { Jobs } from './pages/jobs';
 import { Login } from './pages/login';
 import { Logout } from './pages/logout';
 import { Messages } from './pages/messages';
+import { Profile } from './pages/profile';
 import { Register } from './pages/register';
 import { Settings } from './pages/settings';
+import { NotificationProvider } from './components/notification';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -53,38 +55,41 @@ function App() {
   }, [])
 
   return (
-    <VIEW_CONTEXT.Provider value={viewContext}>
-      {state.ready ?
-        <>
-          {_showToolbar ? <Toolbar /> : null}
-          <div className='App-Body'>
-            <div className='is-fullheight'>
-              <Switch>
-                <Route component={Login} path={links.login} exact />
-                <Route component={Register} path={links.register} exact />
-                <Route component={Logout} path={links.logout} exact />
+    <NotificationProvider>
+      <VIEW_CONTEXT.Provider value={viewContext}>
+        {state.ready ?
+          <>
+            {_showToolbar ? <Toolbar /> : null}
+            <div className='App-Body'>
+              <div className='is-fullheight'>
+                <Switch>
+                  <Route component={Login} path={links.login} exact />
+                  <Route component={Register} path={links.register} exact />
+                  <Route component={Logout} path={links.logout} exact />
 
-                <AuthGuard component={Settings} path={links.settings} />
-                <AuthGuard render={(props) => {
-                  return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
-                }} path={links.jobs} exact />
-                <Route component={Jobs} path={links._jobItem.active} />
-                <AuthGuard component={Jobs} path={links._jobItem.inactive} />
-                <AuthGuard component={Messages} path={links._messages} />
-                <AuthGuard component={Dashboard} path={links.dashboard} exact />
+                  <AuthGuard component={Settings} path={links.settings} />
+                  <AuthGuard render={(props) => {
+                    return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
+                  }} path={links.jobs} exact />
+                  <AuthGuard component={Jobs} path={links._jobItem.active} />
+                  <AuthGuard component={Jobs} path={links._jobItem.inactive} />
+                  <AuthGuard component={Messages} path={links._messages} />
+                  <AuthGuard component={Profile} path={links._profile} />
+                  <AuthGuard component={Dashboard} path={links.dashboard} exact />
 
-                <Route path={links.home} strict={false} exact={true}>
-                  {ctx.signedIn() && viewContext.signedIn ? <Redirect to={links.dashboard} /> : <Redirect to={links.login} />}
-                </Route>
-                <AuthGuard />
-              </Switch>
+                  <Route path={links.home} strict={false} exact={true}>
+                    {ctx.signedIn() && viewContext.signedIn ? <Redirect to={links.dashboard} /> : <Redirect to={links.login} />}
+                  </Route>
+                  <AuthGuard />
+                </Switch>
+              </div>
             </div>
-          </div>
-          {showFooter ? <Footer /> : null}
-        </> :
-        <Loading />
-      }
-    </VIEW_CONTEXT.Provider>
+            {showFooter ? <Footer /> : null}
+          </> :
+          <Loading />
+        }
+      </VIEW_CONTEXT.Provider>
+    </NotificationProvider>
   );
 }
 

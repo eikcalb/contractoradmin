@@ -26,7 +26,7 @@ export function MessageListItem({ message }: { message: IMessage }) {
                                     <p>{`${message.author.firstName} ${message.author.lastName}`}</p>
                                 </div>
                                 <div className='has-text-right column'>
-                                    <p>{time.calendar()}</p>
+                                    <p>{time.calendar({sameElse:'DD/MMM/YYYY'})}</p>
                                 </div>
                             </div>
                             <div className='content has-text-left'>

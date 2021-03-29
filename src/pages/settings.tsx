@@ -140,7 +140,7 @@ export function LoginAndSecurity() {
                         <div className={`control title`}>
                             <button className='button is-link' onClick={() => setState({ ...state, editEmail: !state.editEmail })}>Change</button>
                         </div>
-                        <p className='subtitle has-text-grey'>{state.lastPasswordChanged ? `Last modified ${state.lastPasswordChanged.calendar()}` : "Never Changed"}</p>
+                        <p className='subtitle has-text-grey'>{state.lastPasswordChanged ? `Last modified ${state.lastPasswordChanged.calendar({sameElse:'DD/MMM/YYYY'})}` : "Never Changed"}</p>
 
                     </div>
                 </div>

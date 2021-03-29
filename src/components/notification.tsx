@@ -1,11 +1,42 @@
-import React, { useState } from 'react'
-import { FaSearch, FaMapMarkerAlt, FaCheckSquare, FaCheck, FaCaretUp, FaCaretDown } from 'react-icons/fa'
 import moment from "moment";
-import { Link, NavLink } from 'react-router-dom';
+import React, { useState, createContext, useCallback, useEffect, useContext } from 'react';
+import { FaCaretDown, FaCaretUp, FaCheck, FaMapMarkerAlt, FaSearch } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import { Empty } from './util';
+import { geoFirestore } from "../lib/firebase";
+import { User } from "../lib/user";
+import { APPLICATION_CONTEXT } from "../lib";
+
+const NotificationContext = createContext<{ notifications: INotification[], addNotification: (notif: INotification) => any }>({ notifications: [], addNotification: (notif) => { } })
+
+export function NotificationProvider(props) {
+    const ctx = useContext(APPLICATION_CONTEXT)
+    const [notifications, setNotifications] = useState<INotification[]>([])
+    const addNotification = useCallback((notification: INotification) => {
+        setNotifications([notification, ...notifications])
+    }, [notifications])
+
+    useEffect(() => {
+        const unsubscribe = User.listenForNotifications(ctx, (err, notifications) => {
+            if (err) {
+                console.log(err)
+            } else {
+                setNotifications(notifications || [])
+            }
+        })
+
+        return () => { unsubscribe() }
+    }, [])
+
+    return (
+        <NotificationContext.Provider value={{ notifications, addNotification }}>
+            {props.children}
+        </NotificationContext.Provider>
+    )
+}
 
 export function NotificationItem({ notification }: { notification: INotification }) {
-    const time = moment.unix(notification.timestamp / 1000)
+    const time = moment.unix(notification.dateCreated.toMillis() / 1000)
     return (
         <div className='container is-fluid is-paddingless list-item py-2' title={notification.title}>
             <div className='columns is-variable is-1 py-1 px-1 is-vcentered'>
@@ -38,7 +69,8 @@ export function getNotificationIcon(notif: INotification) {
 
 export function NotificationList({ className }) {
     const [expanded, setExpanded] = useState(true)
-
+    const notifCtx = useContext(NotificationContext)
+    console.log()
     return (
         <nav className={className}>
             <div className='panel is-clipped' >
@@ -52,8 +84,8 @@ export function NotificationList({ className }) {
                     </button>
                 </div>
                 <div style={{ transition: "all 0.500s linear" }} className={`${!expanded ? 'is-height-0' : ''}`}>
-                    {DUMMY_NOTIFICATIONS.length > 0 ?
-                        [...DUMMY_NOTIFICATIONS, ...DUMMY_NOTIFICATIONS, ...DUMMY_NOTIFICATIONS].map((n, index) => (
+                    {notifCtx.notifications.length > 0 ?
+                        notifCtx.notifications.map((n, index) => (
                             <Link key={`${n.id}-${index}`} to={`/f`} className='panel-block'>
                                 <NotificationItem notification={n} />
                             </Link>
@@ -69,7 +101,7 @@ export function NotificationList({ className }) {
 
 export interface INotification {
     content: string
-    timestamp
+    dateCreated
     type: 'discovery' | 'location' | 'progress'
     title: string
     id: string
@@ -78,35 +110,35 @@ export interface INotification {
 const DUMMY_NOTIFICATIONS: INotification[] = [
     {
         content: 'testing 123',
-        timestamp: Date.now(),
+        dateCreated: Date.now(),
         type: 'discovery',
         title: 'testing notification',
         id: '23xe'
     },
     {
         content: 'testing 12',
-        timestamp: Date.now(),
+        dateCreated: Date.now(),
         type: 'location',
         title: 'testing notification',
         id: '23xe'
     },
     {
         title: 'testing 1',
-        timestamp: Date.now(),
+        dateCreated: Date.now(),
         type: 'progress',
         content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
         id: '23se'
     },
     {
         title: 'testing 1',
-        timestamp: Date.now(),
+        dateCreated: Date.now(),
         type: 'location',
         content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
         id: '23se'
     },
     {
         title: 'testing 1',
-        timestamp: Date.now(),
+        dateCreated: Date.now(),
         type: 'discovery',
         content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
         id: '23se'
