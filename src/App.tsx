@@ -18,6 +18,7 @@ import { Profile } from './pages/profile';
 import { Register } from './pages/register';
 import { Settings } from './pages/settings';
 import { NotificationProvider } from './components/notification';
+import { ChatListProvider } from './components/messages';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -58,7 +59,7 @@ function App() {
     <NotificationProvider>
       <VIEW_CONTEXT.Provider value={viewContext}>
         {state.ready ?
-          <>
+          <ChatListProvider>
             {_showToolbar ? <Toolbar /> : null}
             <div className='App-Body'>
               <div className='is-fullheight'>
@@ -85,7 +86,8 @@ function App() {
               </div>
             </div>
             {showFooter ? <Footer /> : null}
-          </> :
+          </ChatListProvider>
+          :
           <Loading />
         }
       </VIEW_CONTEXT.Provider>

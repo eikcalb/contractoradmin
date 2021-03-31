@@ -1,36 +1,101 @@
 import moment from "moment";
-import React from 'react';
+import React, { createContext, HTMLAttributes, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { BsPencilSquare } from 'react-icons/bs';
 import { CgMoreAlt } from 'react-icons/cg';
-import { FaSearch, FaComments } from 'react-icons/fa';
-import { GoSettings } from 'react-icons/go';
-import { User, DUMMY_USER } from '../lib/user';
-import { NavLink } from "react-router-dom";
+import { FaComments, FaSearch } from 'react-icons/fa';
+import { NavLink, Route } from "react-router-dom";
+import { useToasts } from "react-toast-notifications";
+import { APPLICATION_CONTEXT } from "../lib";
+import links from "../lib/links";
+import { IChatItem, IMessage, Message } from "../lib/message";
+import { User } from '../lib/user';
+import { Empty } from "./util";
+
+export const ChatContext = createContext<{ chats: IChatItem[], setChats: (messages: IChatItem[]) => any }>({ chats: [], setChats: (chats) => { } })
+
+export const ChatListProvider = (props) => {
+    const ctx = useContext(APPLICATION_CONTEXT)
+    const [chats, setChats] = useState<IChatItem[]>([])
+
+    const triggerListener = useCallback(() => {
+        const unsubscribe = Message.listenForChats(ctx, async (err, docs) => {
+            if (err) {
+                console.log(err)
+                return
+            }
+            if (!docs) {
+                return
+            }
+            const parsedChats: IChatItem[] = await Promise.all(await docs.map(async (doc) => {
+                const parsed: any = doc.data({ serverTimestamps: 'estimate' })
+                const old = chats.find(chat => chat?.id === doc.id)
+                parsed.id = doc.id
+                try {
+                    parsed.users = await Promise.all(await parsed.users.map(async (user: string) => {
+                        if (user === ctx.user!.id) {
+                            return ctx.user
+                        } else if (old) {
+                            const existing = old.users.find((existing: User) => existing.id === user)
+                            if (existing) {
+                                parsed.recipient = existing
+                                return existing
+                            } else {
+                                const recipient = await User.getExternalUser(ctx, user)
+                                parsed.recipient = recipient
+                                return recipient
+                            }
+                        }
+                        const recipient = await User.getExternalUser(ctx, user)
+                        parsed.recipient = recipient
+                        return recipient
+                    }))
+                    parsed.last_message = { ...parsed.last_message, createdAt: parsed.last_message?.createdAt.toDate() }
+                    return parsed
+                } catch (e) {
+                    console.log('Failed to get user data', e)
+                }
+            }))
+
+            setChats(parsedChats)
+        })
+
+        return () => unsubscribe()
+    }, [chats, ctx])
+
+    useEffect(triggerListener, [])
 
 
-export function MessageListItem({ message }: { message: IMessage }) {
-    const time = moment.unix(message.timestamp / 1000)
     return (
-        <NavLink activeClassName="is-active" to={'./'} className={`message-item mb-8 is-block card is-shadowless has-background-white-ter`}>
+        <ChatContext.Provider value={{ chats, setChats }}>
+            {props.children}
+        </ChatContext.Provider>
+    )
+}
+
+export function MessageListItem({ chat, to }: { chat: IChatItem, to: any }) {
+    const time = moment(chat.last_message!.createdAt)
+
+    return (
+        <NavLink activeClassName="is-active" to={to} className={`job-item message-iitem mb-8 py-2 is-block card is-shadowless has-background-white-ter`}>
             <div className='card-content'>
                 <div className='container is-paddingless'>
-                    <div className='columns'>
+                    <div className='columns '>
                         <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                             <figure className='image is-flex is-48x48'>
-                                <img className='is-rounded' src={message.author.profileImageURL} />
+                                <img className='is-rounded' src={chat.recipient.profilePhoto} />
                             </figure>
                         </div>
                         <div className='column'>
                             <div className='columns mb-0 is-mobile name-bar'>
-                                <div className='has-text-left column is-narrow is-size-5 has-text-weight-medium'>
-                                    <p>{`${message.author.firstName} ${message.author.lastName}`}</p>
+                                <div className='has-text-left column has-text-weight-bold'>
+                                    <p>{`${chat.recipient.firstName} ${chat.recipient.lastName}`}</p>
                                 </div>
-                                <div className='has-text-right column'>
-                                    <p>{time.calendar({sameElse:'DD/MMM/YYYY'})}</p>
+                                <div className='has-text-right is-3-mobile column'>
+                                    <p>{time.calendar({ sameElse: 'DD/MMM/YYYY' })}</p>
                                 </div>
                             </div>
                             <div className='content has-text-left'>
-                                <p>{message.content}</p>
+                                <p>{chat.last_message!.text}</p>
                             </div>
                         </div>
                     </div>
@@ -40,14 +105,54 @@ export function MessageListItem({ message }: { message: IMessage }) {
     )
 }
 
-export function MessageList({ onCreateNew = () => { }, className = '' }) {
+export function MessageItem({ message, isCurrentUser, prevMessage, ...props }: { isCurrentUser: boolean, message: IMessage, prevMessage?: IMessage } & HTMLAttributes<HTMLDivElement>) {
+    const diffDay = Message.isDifferentDay(message, prevMessage)
     return (
-        <div className={`${className} panel job-panel has-background-white-ter is-flex`}>
-            <div className='panel-heading is-flex is-vcentered'>
-                <p className='has-text-left'>Recent Messages</p>
+        <>
+            {!!diffDay && <p className='is-size-8 my-4 has-text-grey-light'>{diffDay.calendar({ sameElse: 'DD/MMM/YYYY' })}</p>}
+            <div {...props} style={{ flexGrow: 0, ...props.style }} className={`container my-1 ${props.className} ${isCurrentUser ? 'mr-0' : 'ml-0'}`}>
+                <div className={`columns my-0 mx-0 is-vcentered ${isCurrentUser ? 'is-flex-direction-row-reverse' : ''}`}>
+                    <div className='column is-paddingless is-narrow is-flex' style={{ justifyContent: 'center' }}>
+                        <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
+                            <figure className='image is-32x32 is-flex'>
+                                <img className='is-rounded' src={message.user.profileImageURL} />
+                            </figure>
+                        </div>
+                        <div className='column is-size-7'>
+                            <span>{message.user.firstName} {message.user.lastName}</span>
+                        </div>
+                    </div>
+                </div>
+                <article style={{ borderRadius: '2em', border: isCurrentUser ? 'solid #dadada88 1px' : 0 }} className={`content px-4 py-2 ${isCurrentUser ? 'has-background-white has-text-black' : 'has-background-link has-text-white'}`}>
+                    <p>{message.text}</p>
+                </article>
+            </div>
+        </>
+    )
+}
+
+export function MessageList({ onNewChat = () => { }, onOptionsClick = () => { }, className = '' }) {
+    const { chats } = useContext(ChatContext)
+
+    return (
+        <div className={`${className} panel job-panel has-background-white-ter is-flex is-size-7`}>
+            <div className='panel-heading is-flex is-vcentered pb-4'>
+                <p className='has-text-left is-size-6'>Recent Messages</p>
                 <div className='field is-grouped is-grouped-right'>
-                    <button className='button is-rounded' onClick={onCreateNew}><BsPencilSquare /></button>
-                    <button className='button is-rounded' onClick={onCreateNew}><CgMoreAlt /></button>
+                    <p className='control'>
+                        <button className='button is-rounded' onClick={onNewChat}>
+                            <span className='icon'>
+                                <BsPencilSquare />
+                            </span>
+                        </button>
+                    </p>
+                    <p className='control'>
+                        <button className='button is-rounded' onClick={onOptionsClick}>
+                            <span className='icon'>
+                                <CgMoreAlt />
+                            </span>
+                        </button>
+                    </p>
                 </div>
             </div>
             <div className='panel-block'>
@@ -56,24 +161,87 @@ export function MessageList({ onCreateNew = () => { }, className = '' }) {
                         <input style={{ borderRight: 0 }} className='input is-rounded' type='search' placeholder='Search Messages...' />
                         <span className='icon is-left'><FaSearch /></span>
                     </div>
-                    <div className='control'>
+                    {/* <div className='control'>
                         <button style={{ borderLeft: 0 }} className='button is-rounded' onClick={() => window.alert("not ready yet")}>
                             <span className='icon is-right'><GoSettings /></span>
                         </button>
-                    </div>
+                    </div> */}
                 </div>
             </div>
             <div className='has-background-white-ter' style={{ overflowY: 'auto', overflowX: 'hidden' }}>
-                {
-                    DUMMY_MESSAGES.map(m => <MessageListItem message={m} />)
-                }
+                <Route path={`${links.messages}`} render={() => {
+                    if (chats.length < 1) {
+                        return <Empty key='messages-empty' className='my-6' style={{ backgroundColor: 'transparent' }} text={'No chat started yet!'} />
+                    } else {
+                        return chats.map(m => <MessageListItem key={m.id} chat={m} to={`${links.messages}/${m.id}`} />)
+                    }
+                }} />
             </div>
         </div>
     )
 }
 
-export function MessageDetail({ message, className, contact }: { contact?: User, className?: string, message: IMessage[] }) {
-    if (!message || !contact) {
+export function MessageDetail({ chat, className }: { chat?: IChatItem, className?: string }) {
+    const ctx = useContext(APPLICATION_CONTEXT)
+    const [messages, setMessages] = useState<IMessage[]>([])
+    const [text, setText] = useState('')
+    const [sending, setSending] = useState(false)
+    const { addToast } = useToasts()
+    const sectionRef = useRef<HTMLElement>(null)
+
+    const sendMessage = useCallback(async () => {
+        setSending(true)
+        try {
+            const message = text.trim()
+            if (!message) {
+                throw new Error('Cannot send empty message!')
+            }
+            if (!chat || !ctx.user) {
+                throw new Error('No chat thread available!')
+            }
+            await Message.sendMessage(ctx, chat, {
+                text: message,
+                type: 'text',
+                user: ctx.user,
+            })
+            setText('')
+        } catch (e) {
+            console.log(e)
+            addToast(e.message || 'Failed to send message', {
+                appearance: 'error'
+            })
+        } finally {
+            setSending(false)
+        }
+    }, [text])
+
+    useEffect(() => {
+        if (chat && chat.initialized) {
+            const unsubscribe = Message.listenForChatMessages(ctx, chat, (err, messages) => {
+                if (err) {
+                    console.log(err)
+                } else if (messages) {
+                    setMessages(messages)
+                }
+            })
+            return () => { unsubscribe() }
+        }
+    }, [chat?.recipient, chat?.initialized])
+
+    useEffect(() => {
+        if (sectionRef.current) {
+            const el = sectionRef.current
+            if (el.scrollHeight > el.clientHeight && el.scrollTop < (el.scrollHeight - el.clientHeight)) {
+                if (sectionRef.current.scroll) {
+                    sectionRef.current.scroll(0, el.scrollHeight - el.clientHeight)
+                } else {
+                    sectionRef.current.scrollTop = el.scrollHeight - el.clientHeight
+                }
+            }
+        }
+    }, [chat?.recipient, messages.length])
+
+    if (!chat) {
         return (
             <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
                 <div className='card-content is-paddingless is-flex-centered has-text-grey my-6'>
@@ -83,23 +251,43 @@ export function MessageDetail({ message, className, contact }: { contact?: User,
             </div>
         )
     }
+
     return (
-        <div className={`${className} card job-detail`} style={{ flexDirection: 'column' }}>
-            <div className='card-content is-paddingless'>
-                <div className='level py-4 mb-0'>
+        <div className={`${className} card job-detail is-fullheight is-flex-direction-column`} style={{ zIndex: 1 }}>
+            <div className='card-content is-paddingless is-atleast-fullheight'>
+                <div className='level py-4 mb-0' style={{ zIndex: 2 }}>
                     <div className='level-item is-size-6'></div>
-                    <div className='level-item is-size-4 has-text-weight-bold'>{`${contact.firstName} ${contact.lastName}`}</div>
+                    <div className='level-item is-size-4 has-text-weight-bold'>{`${chat.recipient.firstName} ${chat.recipient.lastName}`}</div>
                     <div className='level-item is-size-6 pr-4' style={{ justifyContent: 'flex-end' }}>
                         <button className='button is-rounded'><CgMoreAlt /></button>
                     </div>
                 </div>
-                <div className='container is-fluid px-0'>
-                    <div className='columns is-fullheight mx-0 is-multiline'>
-                        <div className='column is-8-fullhd is-7-desktop is-12 px-0'>
-
+                <div className='container is-fluid px-0 is-clipped' style={{ position: 'relative', paddingBottom: '6em' }}>
+                    <section ref={sectionRef} style={{ overflowY: 'auto' }} className='section is-flex pt-1 pb-4 is-fullheight is-flex-direction-column'>
+                        {(chat.initialized === false || messages.length < 1) && (
+                            <div className={`is-flex`} style={{ flexDirection: 'column' }}>
+                                <div className='card-content is-paddingless is-flex-centered has-text-grey my-6'>
+                                    <span className='my-4' ><FaComments fill='#811' style={{ height: "8rem", width: "8rem" }} /></span>
+                                    <p className='is-uppercase is-size-6 has-text-weight-bold'>Send your first chat to `{chat.recipient.firstName} {chat.recipient.lastName}`</p>
+                                </div>
+                            </div>
+                        )}
+                        {messages.map((message, i) => <MessageItem isCurrentUser={message.user.id === ctx.user?.id} message={message} prevMessage={messages[i - 1]} key={message._id} />)}
+                    </section>
+                    <div className='columns is-mobile is-fullheight mx-0 my-0' style={{
+                        position: 'relative', left: 0, right: 0,
+                        bottom: 0, height: '6em',
+                        borderTop: 'solid #dadada88 1px',
+                    }}>
+                        <div className='column is-9 is-mobile'>
+                            <div className={`control ${sending && 'is-loading'}`}>
+                                <textarea onChange={(e) => setText(e.target.value)} value={text} style={{ border: 0, height: '100%', minHeight: 'unset' }} className='textarea has-fixed-size' placeholder='Type a message...'></textarea>
+                            </div>
                         </div>
-                        <div className='column is-4-fullhd is-5-desktop is-12 is-flex'>
-
+                        <div className='column columns is-centered mx-0 my-0 is-3 is-mobile is-flex'>
+                            <div className='buttons'>
+                                <button className='button is-success is-rounded' disabled={!text || sending} onClick={sendMessage}>SEND</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -107,22 +295,3 @@ export function MessageDetail({ message, className, contact }: { contact?: User,
         </div>
     )
 }
-
-
-export interface IMessage {
-    content
-    author: User
-    timestamp
-    type: 'text' | 'image' | 'attachment'
-    id
-}
-
-export const DUMMY_MESSAGES: IMessage[] = [
-    {
-        content: 'hello',
-        author: DUMMY_USER,
-        timestamp: Date.now(),
-        type: 'text',
-        id: 'abcdefgh'
-    }
-]

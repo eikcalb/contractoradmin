@@ -1,11 +1,10 @@
 import moment from "moment";
-import React, { useState, createContext, useCallback, useEffect, useContext } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { FaCaretDown, FaCaretUp, FaCheck, FaMapMarkerAlt, FaSearch } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { Empty } from './util';
-import { geoFirestore } from "../lib/firebase";
-import { User } from "../lib/user";
 import { APPLICATION_CONTEXT } from "../lib";
+import { User } from "../lib/user";
+import { Empty } from './util';
 
 const NotificationContext = createContext<{ notifications: INotification[], addNotification: (notif: INotification) => any }>({ notifications: [], addNotification: (notif) => { } })
 

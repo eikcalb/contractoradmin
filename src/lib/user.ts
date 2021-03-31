@@ -1,8 +1,8 @@
-import { IJobHistory } from "./job";
-import { IEducationHistory, ILicense } from "./education";
 import { Application } from ".";
-import { geoFirestore } from "./firebase";
 import { INotification } from "../components/notification";
+import { IEducationHistory, ILicense } from "./education";
+import { firestore } from "./firebase";
+import { IJobHistory } from "./job";
 
 export const DUMMY_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZjdlMDFmOTBiMjRmNzAwMTcyZmRkOTQiLCJlbWFpbCI6Inp6QGdtYWlsLmNvbSIsInBob25lX251bWJlciI6IisyMzQ4MDgzODIxNzgyIiwiaWF0IjoxNjE1NjYzNDQ4fQ.nHEwobqCa4yT1z27ydwpSHPg_6s4CEp1QarlJGU1HUo"
 export const DUMMY_TOKEN_SECRET = "secret"
@@ -107,6 +107,7 @@ export class User extends AppUser {
             const user = new User(jsonResponse, true)
             user.id = id
             user.token = token
+            user.profilePhoto = User.getPhotoURL(app, id)
 
             return user
 
@@ -136,6 +137,7 @@ export class User extends AppUser {
             const jsonResponse = await response.json()
             const user = new User(jsonResponse, true)
             user.id = id
+            user.profilePhoto = User.getPhotoURL(app, id)
 
             return user
         } catch (e) {
@@ -148,7 +150,7 @@ export class User extends AppUser {
         if (!id) {
             return []
         }
-        const snap = await geoFirestore.collection('comments').doc(id).collection('messages').get()
+        const snap = await firestore.collection('comments').doc(id).collection('messages').get()
         const docs: { text: string, first_name: string, last_name: string }[] = []
         snap.forEach(({ text, first_name, last_name }: any) => docs.push({ text, first_name, last_name }))
         return docs
@@ -156,10 +158,10 @@ export class User extends AppUser {
 
 
     static listenForNotifications(ctx: Application, callback = (err: Error | null, noop?: INotification[] | null) => { }, limit = 100) {
-        let query = geoFirestore.collection('notifications')
+        let query = firestore.collection('notifications')
 
         // TODO: limit notifications displayed to non-admin
-        const unsubscribe = query.native.orderBy('dateCreated', 'desc').limit(limit).onSnapshot(async snap => {
+        const unsubscribe = query.orderBy('dateCreated', 'desc').limit(limit).onSnapshot(async snap => {
             const notifications: INotification[] = [];
             (snap).forEach(doc => {
                 const item: any = doc.data()
@@ -174,6 +176,11 @@ export class User extends AppUser {
 
         return unsubscribe
     }
+
+    static getPhotoURL(app: Application, id) {
+        return `${app.config.hostname}/images/${id}.jpg`
+    }
+
 }
 
 export const DUMMY_USER: User = new User({})

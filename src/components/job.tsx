@@ -12,6 +12,7 @@ import { wait } from './util';
 import { APPLICATION_CONTEXT } from '../lib';
 import { MapView } from './map';
 import links from '../lib/links';
+import { Message, IChatItem } from '../lib/message';
 
 export function JobListItem({ job }: { job: IJob }) {
     const ctx = useContext(APPLICATION_CONTEXT)
@@ -170,7 +171,7 @@ export function JobDetail({ job, className, onCancel }: { onCancel: (job: IJob) 
         <div className={`${className} card job-detail is-size-6`} style={{ flexDirection: 'column' }}>
             <div className='card-content is-paddingless'>
                 <div className='level py-4 mb-0'>
-                    <div className='level-item is-size-7'>POSTED {time.calendar({sameElse:'DD/MMM/YYYY'})}</div>
+                    <div className='level-item is-size-7'>POSTED {time.calendar({ sameElse: 'DD/MMM/YYYY' })}</div>
                     <div className='level-item is-size-6 has-text-weight-bold'>{job.job_title}</div>
                     <div className='level-item is-size-7 has-text-grey'>{job.id}</div>
                 </div>
@@ -265,11 +266,11 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
                                 : null}
                             <tr className='is-flex has-text-left'>
                                 <td style={{ flex: 1 }} className='has-text-grey'> START</td>
-                                <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar({sameElse:'DD/MMM/YYYY'}) || `-`}</td>
+                                <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar({ sameElse: 'DD/MMM/YYYY' }) || `-`}</td>
                             </tr>
                             <tr className='is-flex has-text-left'>
                                 <td style={{ flex: 1 }} className='has-text-grey'>END</td>
-                                <td style={{ flex: 2 }} className=' has-text-left'>{endTime?.calendar({sameElse:'DD/MMM/YYYY'}) || `-`}</td>
+                                <td style={{ flex: 2 }} className=' has-text-left'>{endTime?.calendar({ sameElse: 'DD/MMM/YYYY' }) || `-`}</td>
                             </tr>
                             <tr className='is-flex has-text-left'>
                                 <td style={{ flex: 1 }} className='has-text-grey'>TOTAL TIME</td>
@@ -316,7 +317,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                              */}
                             </p>
                             <p className='is-size-7'>{job.user?.profileBio}</p>
-                            <p className='has-text-left has-text-grey-light is-size-8'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar({sameElse:'DD/MMM/YYYY'})}</p>
+                            <p className='has-text-left has-text-grey-light is-size-8'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar({ sameElse: 'DD/MMM/YYYY' })}</p>
                         </div>
                     </div>
                 </div>
@@ -334,7 +335,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
                         </tr> */}
                         <tr className='is-flex has-text-left'>
                             <td style={{ flex: 1 }} className='has-text-grey'>START TIME</td>
-                            <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar({sameElse:'DD/MMM/YYYY'})}</td>
+                            <td style={{ flex: 2 }} className='has-text-left'>{startTime.calendar({ sameElse: 'DD/MMM/YYYY' })}</td>
                         </tr>
                         <tr className='is-flex has-text-left'>
                             <td style={{ flex: 1 }} className='has-text-grey'>HIGHLIGHTED SKILLS AND LICENSES</td>
@@ -345,7 +346,17 @@ export function JobDetailUser({ job }: { job: IJob }) {
                         </tr>
                     </tbody>
                 </table>
-                <Link to={`${links.messages}/${job.user!.id}`} className='button is-info is-uppercase mx-4' style={{ alignSelf: 'flex-start' }}>Message</Link>
+                <Link to={{
+                    pathname: `${links.messages}/${Message.generateID(ctx.user?.id, job.user?.id)}`,
+                    state: {
+                        chat: {
+                            id: Message.generateID(ctx.user?.id, job.user?.id),
+                            initialized: false,
+                            recipient: job.user,
+                            users: [ctx.user, job.user],
+                        } as IChatItem
+                    }
+                }} className='button is-info is-uppercase mx-4' style={{ alignSelf: 'flex-start' }}>Message</Link>
             </div>
         </div>
     )
@@ -384,7 +395,7 @@ export function JobReview({ job }: { job: IJob }) {
                              */}
                                 </p>
                                 <p className='is-size-7'>{job.user?.profileBio}</p>
-                                <p className='has-text-left has-text-grey-light is-size-7'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar({sameElse:'DD/MMM/YYYY'})}</p>
+                                <p className='has-text-left has-text-grey-light is-size-7'><span className='is-uppercase'>member since</span>&nbsp; {moment(job.user?.dateCreated).calendar({ sameElse: 'DD/MMM/YYYY' })}</p>
                             </div>
                         </div>
                     </div>

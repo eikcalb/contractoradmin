@@ -6,7 +6,7 @@
 - User review badges
   - Compliments
   - Achievments
-
+- Fix responsiveness
 ---
 
 - How to resolve path to get job author profile picture.
