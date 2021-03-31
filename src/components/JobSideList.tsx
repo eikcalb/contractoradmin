@@ -84,10 +84,11 @@ export const JobSideList = ({ className, activeJobs, isActive, inactiveJobs, onC
         }
     }, [activeJobs, inactiveJobs])
 
-    const search = useDebouncedCallback((() => {
-        // e.stopPropagation()
-        // e.preventDefault()
-
+    const search = useDebouncedCallback(((e?: any) => {
+        if (e) {
+            e.stopPropagation()
+            e.preventDefault()
+        }
         const search = searchText.trim()
         if (!search) {
             setActiveSearchData(null)

@@ -10,6 +10,7 @@ import links from "../lib/links";
 import { IChatItem, IMessage, Message } from "../lib/message";
 import { User } from '../lib/user';
 import { Empty } from "./util";
+import { useDebouncedCallback } from "use-debounce";
 
 export const ChatContext = createContext<{ chats: IChatItem[], setChats: (messages: IChatItem[]) => any }>({ chats: [], setChats: (chats) => { } })
 
@@ -133,6 +134,52 @@ export function MessageItem({ message, isCurrentUser, prevMessage, ...props }: {
 
 export function MessageList({ onNewChat = () => { }, onOptionsClick = () => { }, className = '' }) {
     const { chats } = useContext(ChatContext)
+    const [searchedChat, setSearchedChat] = useState<IChatItem[] | null>(null)
+    const [searchText, setSearchText] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+
+    const triggerSearch = useCallback(async (search) => {
+        setIsLoading(true)
+        try {
+            if (chats.length < 1) {
+                throw new Error('There is no chat to search')
+            }
+            if (!search) {
+                setSearchedChat(null)
+            }
+            const regexp = new RegExp(search, 'i')
+
+            const results = chats.filter((chat: IChatItem) => {
+                return (chat.last_message ? chat.last_message.text.search(regexp) >= 0 : false) || chat.recipient.firstName?.search(regexp) >= 0 || chat.recipient.lastName?.search(regexp) >= 0
+            })
+            console.log(results)
+            setSearchedChat(results)
+            setIsLoading(false)
+        } catch (e) {
+            console.log(e)
+            setSearchedChat([])
+            setIsLoading(false)
+        }
+    }, [chats])
+
+    const search = useDebouncedCallback(((e?: any) => {
+        if (e) {
+            e.stopPropagation()
+            e.preventDefault()
+        }
+
+        const search = searchText.trim()
+        if (!search) {
+            setSearchedChat(null)
+        }
+        if (search) {
+            triggerSearch(search)
+        }
+    }), 800)
+
+    useEffect(() => {
+        search()
+    }, [searchText])
 
     return (
         <div className={`${className} panel job-panel has-background-white-ter is-flex is-size-7`}>
@@ -140,14 +187,14 @@ export function MessageList({ onNewChat = () => { }, onOptionsClick = () => { },
                 <p className='has-text-left is-size-6'>Recent Messages</p>
                 <div className='field is-grouped is-grouped-right'>
                     <p className='control'>
-                        <button className='button is-rounded' onClick={onNewChat}>
+                        <button className='button is-rounded is-small' onClick={onNewChat}>
                             <span className='icon'>
                                 <BsPencilSquare />
                             </span>
                         </button>
                     </p>
                     <p className='control'>
-                        <button className='button is-rounded' onClick={onOptionsClick}>
+                        <button className='button is-rounded is-small' onClick={onOptionsClick}>
                             <span className='icon'>
                                 <CgMoreAlt />
                             </span>
@@ -157,10 +204,14 @@ export function MessageList({ onNewChat = () => { }, onOptionsClick = () => { },
             </div>
             <div className='panel-block'>
                 <div className='field has-addons' style={{ flex: 1 }}>
-                    <div className='control is-expanded has-icons-left'>
-                        <input style={{ borderRight: 0 }} className='input is-rounded' type='search' placeholder='Search Messages...' />
+                    <form onSubmit={(e) => {
+                        e.stopPropagation()
+                        e.preventDefault()
+                        search()
+                    }} className='control is-expanded has-icons-left'>
+                        <input value={searchText} onChange={e => setSearchText(e.target.value)} style={{ borderRight: 0 }} className='input is-rounded' type='search' placeholder='Search Messages...' />
                         <span className='icon is-left'><FaSearch /></span>
-                    </div>
+                    </form>
                     {/* <div className='control'>
                         <button style={{ borderLeft: 0 }} className='button is-rounded' onClick={() => window.alert("not ready yet")}>
                             <span className='icon is-right'><GoSettings /></span>
@@ -170,10 +221,14 @@ export function MessageList({ onNewChat = () => { }, onOptionsClick = () => { },
             </div>
             <div className='has-background-white-ter' style={{ overflowY: 'auto', overflowX: 'hidden' }}>
                 <Route path={`${links.messages}`} render={() => {
-                    if (chats.length < 1) {
+                    if (isLoading) {
+                        return <div key='meassages-loader' className='px-6 my-6 is-flex'><progress style={{ height: '0.4rem' }} className="progress is-small my-6" max="100">loading</progress></div>
+                    } else if (searchText && searchedChat && searchedChat.length < 1) {
+                        return <Empty key='messages-search-empty' className='my-6' style={{ backgroundColor: 'transparent' }} text={'Search did not return any chat'} />
+                    } else if (chats.length < 1) {
                         return <Empty key='messages-empty' className='my-6' style={{ backgroundColor: 'transparent' }} text={'No chat started yet!'} />
                     } else {
-                        return chats.map(m => <MessageListItem key={m.id} chat={m} to={`${links.messages}/${m.id}`} />)
+                        return (searchText && searchedChat ? searchedChat : chats).map(m => <MessageListItem key={m.id} chat={m} to={`${links.messages}/${m.id}`} />)
                     }
                 }} />
             </div>
@@ -255,15 +310,15 @@ export function MessageDetail({ chat, className }: { chat?: IChatItem, className
     return (
         <div className={`${className} card job-detail is-fullheight is-flex-direction-column`} style={{ zIndex: 1 }}>
             <div className='card-content is-paddingless is-atleast-fullheight'>
-                <div className='level py-4 mb-0' style={{ zIndex: 2 }}>
-                    <div className='level-item is-size-6'></div>
-                    <div className='level-item is-size-4 has-text-weight-bold'>{`${chat.recipient.firstName} ${chat.recipient.lastName}`}</div>
-                    <div className='level-item is-size-6 pr-4' style={{ justifyContent: 'flex-end' }}>
-                        <button className='button is-rounded'><CgMoreAlt /></button>
+                <div className='level py-4 mb-0 is-mobile' style={{ zIndex: 2 }}>
+                    <div className='level-item is-size-7'></div>
+                    <div className='level-item is-size-5 has-text-weight-bold'>{`${chat.recipient.firstName} ${chat.recipient.lastName}`}</div>
+                    <div className='level-item is-size-7 pr-4' style={{ justifyContent: 'flex-end' }}>
+                        <button className='button is-rounded is-small'><CgMoreAlt /></button>
                     </div>
                 </div>
                 <div className='container is-fluid px-0 is-clipped' style={{ position: 'relative', paddingBottom: '6em' }}>
-                    <section ref={sectionRef} style={{ overflowY: 'auto' }} className='section is-flex pt-1 pb-4 is-fullheight is-flex-direction-column'>
+                    <section ref={sectionRef} style={{ overflowY: 'auto' }} className='section is-flex pt-1 pb-0 is-fullheight is-flex-direction-column'>
                         {(chat.initialized === false || messages.length < 1) && (
                             <div className={`is-flex`} style={{ flexDirection: 'column' }}>
                                 <div className='card-content is-paddingless is-flex-centered has-text-grey my-6'>
