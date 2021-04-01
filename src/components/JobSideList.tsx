@@ -30,7 +30,9 @@ export const JobSideList = ({ className, activeJobs, isActive, inactiveJobs, onC
         const regexp = new RegExp(query, 'i')
 
         const result = jobs.filter(job => {
-            return job.job_description?.search(regexp) >= 0 || job.job_title?.search(regexp) >= 0 || job.location_address?.search(regexp) >= 0 || job.job_type?.search(regexp) >= 0
+            return job.job_description?.search(regexp) >= 0 || job.job_title?.search(regexp) >= 0
+                || job.location_address?.search(regexp) >= 0 || job.job_type?.search(regexp) >= 0
+                || (job.user ? job.user.firstName.search(regexp) >= 0 : false) || (job.user ? job.user.lastName.search(regexp) >= 0 : false)
         })
         callback(undefined, result)
     }, [activeJobs, inactiveJobs, searchText])
@@ -84,11 +86,7 @@ export const JobSideList = ({ className, activeJobs, isActive, inactiveJobs, onC
         }
     }, [activeJobs, inactiveJobs])
 
-    const search = useDebouncedCallback(((e?: any) => {
-        if (e) {
-            e.stopPropagation()
-            e.preventDefault()
-        }
+    const search = useDebouncedCallback((() => {
         const search = searchText.trim()
         if (!search) {
             setActiveSearchData(null)
@@ -110,7 +108,11 @@ export const JobSideList = ({ className, activeJobs, isActive, inactiveJobs, onC
                 <a className='button is-small is-rounded is-size-7' onClick={onCreateNew}><BsPencilSquare /></a>
             </div>
             <div className='panel-block'>
-                <form onSubmit={search} className='field has-addons' style={{ flex: 1 }}>
+                <form onSubmit={(e) => {
+                    e.stopPropagation()
+                    e.preventDefault()
+                    search()
+                }} className='field has-addons' style={{ flex: 1 }}>
                     <div className={`control is-expanded has-icons-left`}>
                         <input style={{ borderRight: 0 }} className='input is-rounded' value={searchText} onChange={(e => setSearchText(e.target.value))} type='search' placeholder='Search Jobs...' />
                         <span className='icon is-left'><FaSearch /></span>

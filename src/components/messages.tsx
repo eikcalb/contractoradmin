@@ -2,8 +2,8 @@ import moment from "moment";
 import React, { createContext, HTMLAttributes, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { BsPencilSquare } from 'react-icons/bs';
 import { CgMoreAlt } from 'react-icons/cg';
-import { FaComments, FaSearch } from 'react-icons/fa';
-import { NavLink, Route } from "react-router-dom";
+import { FaComments, FaSearch, FaStar } from 'react-icons/fa';
+import { NavLink, Route, Link } from "react-router-dom";
 import { useToasts } from "react-toast-notifications";
 import { APPLICATION_CONTEXT } from "../lib";
 import links from "../lib/links";
@@ -241,8 +241,19 @@ export function MessageDetail({ chat, className }: { chat?: IChatItem, className
     const [messages, setMessages] = useState<IMessage[]>([])
     const [text, setText] = useState('')
     const [sending, setSending] = useState(false)
+    const [userView, setUserView] = useState<User | null>(null)
     const { addToast } = useToasts()
     const sectionRef = useRef<HTMLElement>(null)
+    const inputRef = useRef<HTMLTextAreaElement>(null)
+
+    const onOptionsClick = useCallback(async () => {
+        if (userView) {
+            return setUserView(null)
+        }
+        if (chat?.recipient) {
+            setUserView(chat?.recipient)
+        }
+    }, [chat?.recipient, userView])
 
     const sendMessage = useCallback(async () => {
         setSending(true)
@@ -284,6 +295,11 @@ export function MessageDetail({ chat, className }: { chat?: IChatItem, className
     }, [chat?.recipient, chat?.initialized])
 
     useEffect(() => {
+        setText('')
+        if (chat?.recipient && userView && userView.id !== chat?.recipient.id) {
+            setUserView(chat.recipient)
+        }
+
         if (sectionRef.current) {
             const el = sectionRef.current
             if (el.scrollHeight > el.clientHeight && el.scrollTop < (el.scrollHeight - el.clientHeight)) {
@@ -293,6 +309,9 @@ export function MessageDetail({ chat, className }: { chat?: IChatItem, className
                     sectionRef.current.scrollTop = el.scrollHeight - el.clientHeight
                 }
             }
+        }
+        if (chat?.recipient && document.activeElement !== inputRef.current) {
+            inputRef.current?.focus()
         }
     }, [chat?.recipient, messages.length])
 
@@ -308,43 +327,80 @@ export function MessageDetail({ chat, className }: { chat?: IChatItem, className
     }
 
     return (
-        <div className={`${className} card job-detail is-fullheight is-flex-direction-column`} style={{ zIndex: 1 }}>
+        <div className={`${className} card job-detail is-fullheight is-flex-direction-column`} style={{ zIndex: 1, animation: 'all 0.5s linear' }}>
             <div className='card-content is-paddingless is-atleast-fullheight'>
                 <div className='level py-4 mb-0 is-mobile' style={{ zIndex: 2 }}>
                     <div className='level-item is-size-7'></div>
                     <div className='level-item is-size-5 has-text-weight-bold'>{`${chat.recipient.firstName} ${chat.recipient.lastName}`}</div>
                     <div className='level-item is-size-7 pr-4' style={{ justifyContent: 'flex-end' }}>
-                        <button className='button is-rounded is-small'><CgMoreAlt /></button>
+                        <button onClick={onOptionsClick} className='button is-rounded is-small'><CgMoreAlt /></button>
                     </div>
                 </div>
-                <div className='container is-fluid px-0 is-clipped' style={{ position: 'relative', paddingBottom: '6em' }}>
-                    <section ref={sectionRef} style={{ overflowY: 'auto' }} className='section is-flex pt-1 pb-0 is-fullheight is-flex-direction-column'>
-                        {(chat.initialized === false || messages.length < 1) && (
-                            <div className={`is-flex`} style={{ flexDirection: 'column' }}>
-                                <div className='card-content is-paddingless is-flex-centered has-text-grey my-6'>
-                                    <span className='my-4' ><FaComments fill='#811' style={{ height: "8rem", width: "8rem" }} /></span>
-                                    <p className='is-uppercase is-size-6 has-text-weight-bold'>Send your first chat to `{chat.recipient.firstName} {chat.recipient.lastName}`</p>
+                <div className='columns mx-0 my-0 is-fullheight is-clipped'>
+                    <div className={`container is-fullheight is-fluid px-0 is-clipped ${userView ? 'column is-7 is-hidden-mobile' : ''}`} style={{ position: 'relative', paddingBottom: '6em' }}>
+                        <section ref={sectionRef} style={{ overflowY: 'auto' }} className='section is-flex pt-1 pb-0 is-fullheight is-flex-direction-column'>
+                            {(chat.initialized === false || messages.length < 1) && (
+                                <div className={`is-flex`} style={{ flexDirection: 'column' }}>
+                                    <div className='card-content is-paddingless is-flex-centered has-text-grey my-6'>
+                                        <span className='my-4' ><FaComments fill='#811' style={{ height: "8rem", width: "8rem" }} /></span>
+                                        <p className='is-uppercase is-size-6 has-text-weight-bold'>Send your first chat to `{chat.recipient.firstName} {chat.recipient.lastName}`</p>
+                                    </div>
+                                </div>
+                            )}
+                            {messages.map((message, i) => <MessageItem isCurrentUser={message.user.id === ctx.user?.id} message={message} prevMessage={messages[i - 1]} key={message._id} />)}
+                        </section>
+                        <div className='columns is-mobile is-fullheight mx-0 my-0' style={{
+                            position: 'relative', left: 0, right: 0,
+                            bottom: 0, height: '6em',
+                            borderTop: 'solid #dadada88 1px',
+                        }}>
+                            <div className='column is-8 is-mobile'>
+                                <div className={`control ${sending && 'is-loading'}`}>
+                                    <textarea autoFocus ref={inputRef} onChange={(e) => setText(e.target.value)} value={text} style={{ border: 0, height: '100%', minHeight: 'unset' }} className='textarea has-fixed-size' placeholder='Type a message...'></textarea>
                                 </div>
                             </div>
-                        )}
-                        {messages.map((message, i) => <MessageItem isCurrentUser={message.user.id === ctx.user?.id} message={message} prevMessage={messages[i - 1]} key={message._id} />)}
-                    </section>
-                    <div className='columns is-mobile is-fullheight mx-0 my-0' style={{
-                        position: 'relative', left: 0, right: 0,
-                        bottom: 0, height: '6em',
-                        borderTop: 'solid #dadada88 1px',
-                    }}>
-                        <div className='column is-9 is-mobile'>
-                            <div className={`control ${sending && 'is-loading'}`}>
-                                <textarea onChange={(e) => setText(e.target.value)} value={text} style={{ border: 0, height: '100%', minHeight: 'unset' }} className='textarea has-fixed-size' placeholder='Type a message...'></textarea>
-                            </div>
-                        </div>
-                        <div className='column columns is-centered mx-0 my-0 is-3 is-mobile is-flex'>
-                            <div className='buttons'>
-                                <button className='button is-success is-rounded' disabled={!text || sending} onClick={sendMessage}>SEND</button>
+                            <div className='column columns is-centered mx-0 my-0 is-4 is-mobile is-flex'>
+                                <div className='buttons'>
+                                    <button className='button is-success is-rounded' disabled={!text || sending} onClick={sendMessage}>SEND</button>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {!!userView && (
+                        <div className='column is-5' style={{ borderLeft: 'solid 1px #8884' }}>
+                            <div className='container pt-4 pb-0 is-flex' style={{ flexDirection: 'column' }} >
+                                <div style={{ borderBottom: 'solid #aaa4 0.2px', alignItems: 'stretch' }} className='columns is-centered mb-0 is-flex is-flex-direction-column px-4'>
+                                    <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
+                                        <figure className='image is-128x128 is-flex'>
+                                            <img key={userView.profilePhoto} className='is-rounded' src={userView.profilePhoto} />
+                                        </figure>
+                                    </div>
+                                    <div className='column'>
+                                        <div className='container has-text-centered '>
+                                            <p className='is-size-6 has-text-weight-bold'>{`${userView.firstName} ${userView.lastName}`}</p>
+                                            <div className='content'>
+                                                <p className='is-size-6'><span className='icon has-text-info'><FaStar /></span>{userView.starRate}</p>
+                                                <p className='is-size-6'>{userView.profileBio}</p>
+                                                <p className='has-text-grey-light is-size-8'><span className='is-uppercase'>member since</span>&nbsp; {moment(userView.dateCreated).calendar({ sameElse: 'DD/MMM/YYYY' })}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className='is-flex py-4' style={{ flexDirection: 'column', justifyContent: 'space-between', flex: 1 }}>
+                                    <table className='table is-hoverable is-fullwidth'>
+                                        <tbody className='is-size-6'>
+                                            <tr className='is-flex has-text-left'>
+                                                <td style={{ flex: 1 }} className='has-text-grey is-size-6'>{userView.phoneNumber}</td>
+                                                <td style={{ flex: 2 }} className='has-text-right'>
+                                                    <Link to={{ pathname: `${links.profile}/${userView.id}`, state: { user: userView } }} className="has-text-link pr-0 pb-0 is-size-6">View Profile</Link>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

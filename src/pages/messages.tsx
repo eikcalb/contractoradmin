@@ -34,8 +34,8 @@ export function Messages() {
 
     return (
         <div className='columns is-gapless px-4 py-4 is-fullheight is-multiline'>
-            <MessageList onNewChat={() => { }} className='column is-4 is-12-mobile is-clipped is-fullheight' />
-            <MessageDetail chat={chat} className='column is-6 is-12-mobile is-flex' />
+            <MessageList onNewChat={() => { }} className='column is-3 is-12-mobile is-clipped is-fullheight' />
+            <MessageDetail chat={chat} className='column is-7 is-12-mobile is-flex' />
         </div>
     )
 }
