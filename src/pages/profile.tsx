@@ -7,7 +7,7 @@ import { APPLICATION_CONTEXT } from '../lib';
 import { Job } from '../lib/job';
 import { User } from '../lib/user';
 import moment from "moment";
-import logo from '../logo.svg'
+import logo from '../logo_runner.jpg'
 
 
 /**

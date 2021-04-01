@@ -4,7 +4,7 @@ import { FaJoint, FaUser, FaContao, FaCog, FaSearch } from "react-icons/fa";
 import { APPLICATION_CONTEXT, VIEW_CONTEXT } from '../lib';
 import { Link, NavLink } from 'react-router-dom';
 import links from '../lib/links';
-
+import logo from '../logo.jpg'
 
 const AUTOHIDE_TIMEOUT = 20000
 let timer: any
@@ -31,8 +31,7 @@ export default function Toolbar() {
         <nav className='navbar' role='navigation' style={STYLES.toolbar} aria-label='main navigation'>
             <div className='navbar-brand'>
                 <Link className='navbar-item' to={links.home}>
-                    <FaContao style={STYLES.appLogoIcon} />
-                    <span style={STYLES.appLogoText}>{ctx.config.name}</span>
+                    <img src={logo} width="112" height="28" />
                 </Link>
                 <a role="button" className={`navbar-burger burger ${state.showMenu ? 'is-active' : ''}`} aria-label="menu" aria-expanded="false" data-target="navbar" onClick={toggleMenu}>
                     <span aria-hidden="true"></span>
@@ -61,7 +60,7 @@ export default function Toolbar() {
                             {`${ctx.user?.firstName} ${ctx.user?.lastName}`}
                         </span>
                         <div className='navbar-dropdown'>
-                            <Link to={{pathname:`${links.profile}/${ctx.user?.id}`}} className='navbar-item'>Profile</Link>
+                            <Link to={{ pathname: `${links.profile}/${ctx.user?.id}` }} className='navbar-item'>Profile</Link>
                             <Link to={links.helpCenter} className='navbar-item'>Help Center</Link>
                             <Link to={links.logout} className='navbar-item'>Sign Out</Link>
                         </div>

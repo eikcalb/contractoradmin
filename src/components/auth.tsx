@@ -5,7 +5,7 @@ import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useToasts } from 'react-toast-notifications';
 import { APPLICATION_CONTEXT, VIEW_CONTEXT } from '../lib';
 import links from '../lib/links';
-import logo from "../logo.svg";
+import logo from "../logo_runner.jpg";
 
 export interface IRegister {
     first_name: string,
