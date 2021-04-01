@@ -16,16 +16,18 @@ export function NotificationProvider(props) {
     }, [notifications])
 
     useEffect(() => {
-        const unsubscribe = User.listenForNotifications(ctx, (err, notifications) => {
-            if (err) {
-                console.log(err)
-            } else {
-                setNotifications(notifications || [])
-            }
-        })
+        if (ctx.user) {
+            const unsubscribe = User.listenForNotifications(ctx, (err, notifications) => {
+                if (err) {
+                    console.log(err)
+                } else {
+                    setNotifications(notifications || [])
+                }
+            })
 
-        return () => { unsubscribe() }
-    }, [])
+            return unsubscribe
+        }
+    }, [ctx.user])
 
     return (
         <NotificationContext.Provider value={{ notifications, addNotification }}>
@@ -105,41 +107,3 @@ export interface INotification {
     title: string
     id: string
 }
-
-const DUMMY_NOTIFICATIONS: INotification[] = [
-    {
-        content: 'testing 123',
-        dateCreated: Date.now(),
-        type: 'discovery',
-        title: 'testing notification',
-        id: '23xe'
-    },
-    {
-        content: 'testing 12',
-        dateCreated: Date.now(),
-        type: 'location',
-        title: 'testing notification',
-        id: '23xe'
-    },
-    {
-        title: 'testing 1',
-        dateCreated: Date.now(),
-        type: 'progress',
-        content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
-        id: '23se'
-    },
-    {
-        title: 'testing 1',
-        dateCreated: Date.now(),
-        type: 'location',
-        content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
-        id: '23se'
-    },
-    {
-        title: 'testing 1',
-        dateCreated: Date.now(),
-        type: 'discovery',
-        content: "Lorem ipsum dolor sit amet consectetur adipisicing elit.?",
-        id: '23se'
-    }
-]

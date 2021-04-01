@@ -57,40 +57,41 @@ function App() {
 
   return (
     <NotificationProvider>
-      <VIEW_CONTEXT.Provider value={viewContext}>
-        {state.ready ?
-          <ChatListProvider>
-            {_showToolbar ? <Toolbar /> : null}
-            <div className='App-Body'>
-              <div className='is-fullheight'>
-                <Switch>
-                  <Route component={Login} path={links.login} exact />
-                  <Route component={Register} path={links.register} exact />
-                  <Route component={Logout} path={links.logout} exact />
+      <ChatListProvider>
+        <VIEW_CONTEXT.Provider value={viewContext}>
+          {state.ready ?
+            <>
+              {_showToolbar ? <Toolbar /> : null}
+              <div className='App-Body'>
+                <div className='is-fullheight'>
+                  <Switch>
+                    <Route component={Login} path={links.login} exact />
+                    <Route component={Register} path={links.register} exact />
+                    <Route component={Logout} path={links.logout} exact />
 
-                  <AuthGuard component={Settings} path={links.settings} />
-                  <AuthGuard render={(props) => {
-                    return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
-                  }} path={links.jobs} exact />
-                  <AuthGuard component={Jobs} path={links._jobItem.active} />
-                  <AuthGuard component={Jobs} path={links._jobItem.inactive} />
-                  <AuthGuard component={Messages} path={links._messages} />
-                  <AuthGuard component={Profile} path={links._profile} />
-                  <AuthGuard component={Dashboard} path={links.dashboard} exact />
+                    <AuthGuard component={Settings} path={links.settings} />
+                    <AuthGuard render={(props) => {
+                      return <Redirect to={{ pathname: links.activeJobs, state: props.location.state }} />
+                    }} path={links.jobs} exact />
+                    <AuthGuard component={Jobs} path={links._jobItem.active} />
+                    <AuthGuard component={Jobs} path={links._jobItem.inactive} />
+                    <AuthGuard component={Messages} path={links._messages} />
+                    <AuthGuard component={Profile} path={links._profile} />
+                    <AuthGuard component={Dashboard} path={links.dashboard} exact />
 
-                  <Route path={links.home} strict={false} exact={true}>
-                    {ctx.signedIn() && viewContext.signedIn ? <Redirect to={links.dashboard} /> : <Redirect to={links.login} />}
-                  </Route>
-                  <AuthGuard />
-                </Switch>
+                    <Route path={links.home} strict={false} exact={true}>
+                      {ctx.signedIn() && viewContext.signedIn ? <Redirect to={links.dashboard} /> : <Redirect to={links.login} />}
+                    </Route>
+                    <AuthGuard />
+                  </Switch>
+                </div>
               </div>
-            </div>
-            {showFooter ? <Footer /> : null}
-          </ChatListProvider>
-          :
-          <Loading />
-        }
-      </VIEW_CONTEXT.Provider>
+              {showFooter ? <Footer /> : null}
+            </> :
+            <Loading />
+          }
+        </VIEW_CONTEXT.Provider>
+      </ChatListProvider>
     </NotificationProvider>
   );
 }

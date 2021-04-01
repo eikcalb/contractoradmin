@@ -100,7 +100,7 @@ export class Message {
 
     static listenForChats(app: Application, callback: (err?: Error | null, data?: firebase.firestore.QueryDocumentSnapshot<firebase.firestore.DocumentData>[] | null) => any) {
         let query = db
-        .where("users", 'array-contains', app.user!.id)
+        .where("users", 'array-contains', app.user?.id)
         .where('initialized', '==', true)
         .orderBy("last_message.createdAt", 'desc')
         const unsubscribe = query.onSnapshot(async snap => {

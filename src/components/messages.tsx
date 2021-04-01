@@ -63,7 +63,11 @@ export const ChatListProvider = (props) => {
         return () => unsubscribe()
     }, [chats, ctx])
 
-    useEffect(triggerListener, [])
+    useEffect(() => {
+        if (ctx.user) {
+            return triggerListener()
+        }
+    }, [ctx.user])
 
 
     return (
