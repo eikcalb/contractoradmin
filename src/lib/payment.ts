@@ -25,6 +25,24 @@ export interface IPayment {
     id: string
 }
 
+export interface IInvoice {
+    invoiceReference: string
+    description?: string
+    jobTitle?: string
+    jobStatus?: string
+    location?: string
+    amount: string
+    fees: string
+    total: string
+    deployee?: string
+    paymentMethod: string
+    invoiceURL: string
+    transactionStatus: string
+    transactionID: string
+    user: String
+    dateCreated: Date
+}
+
 export interface ITransaction extends ICard {
     id: string
     amount: number
@@ -33,6 +51,7 @@ export interface ITransaction extends ICard {
 
 const CurrencyFormatter = Intl.NumberFormat('en-US', { currency: 'USD', style: 'currency', maximumFractionDigits: 2 })
 export const PAYMENT_PAGE_LIMIT = 30
+export const INVOICE_PAGE_LIMIT = 30
 
 export class Payment {
     static async getTransactions(app: Application, page = 1, limit = PAYMENT_PAGE_LIMIT): Promise<IPayment[]> {
@@ -53,6 +72,20 @@ export class Payment {
             payee,
             status: status === TRANSACTION_STATUS.SUCCESS ? 'paid' : 'pending'
         }))
+    }
+
+    static async getInvoices(app: Application, page = 1, limit = PAYMENT_PAGE_LIMIT): Promise<IInvoice[]> {
+        const resp = await app.initiateNetworkRequest(`/payments/invoices?page=${page}&limit=${limit}`, undefined, true)
+        if (!resp.ok) {
+            if (resp.status === 418) {
+                throw new Error((await resp.json()).message || 'Failed to fetch transactions')
+            } else {
+                throw new Error('Failed to fetch transactions')
+            }
+        }
+
+        const result = (await resp.json())
+        return result.invoices
     }
 
     static getPaymentDescription(payment: IPayment): string {

@@ -19,6 +19,7 @@ import { Register } from './pages/register';
 import { Settings } from './pages/settings';
 import { NotificationProvider } from './components/notification';
 import { ChatListProvider } from './components/messages';
+import { Invoices } from './pages/invoices';
 
 function App() {
   const ctx = useContext(APPLICATION_CONTEXT)
@@ -77,6 +78,7 @@ function App() {
                     <AuthGuard component={Jobs} path={links._jobItem.inactive} />
                     <AuthGuard component={Messages} path={links._messages} />
                     <AuthGuard component={Profile} path={links._profile} />
+                    <AuthGuard component={Invoices} path={links.invoices} exact />
                     <AuthGuard component={Dashboard} path={links.dashboard} exact />
 
                     <Route path={links.home} strict={false} exact={true}>

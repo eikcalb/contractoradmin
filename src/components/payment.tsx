@@ -1,6 +1,6 @@
 import moment from 'moment';
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { FaCaretDown, FaCaretUp } from "react-icons/fa";
+import { FaCaretDown, FaCaretUp, FaMoneyBill, FaMoneyBillWave, FaMoneyBillWaveAlt, FaMoneyBillAlt } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { APPLICATION_CONTEXT } from '../lib';
 import { IPayment, Payment, PAYMENT_PAGE_LIMIT } from "../lib/payment";
@@ -68,7 +68,7 @@ export function PaymentList({ className }) {
                             </Link>
                         ))
                         :
-                        <Empty text='No Payment data available' />
+                        <Empty icon={<FaMoneyBillAlt className='has-text-warning-dark is-size-4 mb-2' />} text='No Payment data available' />
                     }
                 </div>
             </div>

@@ -6,6 +6,8 @@ import { Job, IJob } from '../lib/job';
 import { useToasts } from 'react-toast-notifications';
 import { JobListItem } from './job';
 import links from '../lib/links';
+import { Empty } from './util';
+import { FaHardHat } from 'react-icons/fa';
 
 export function JobList({ className }: { className?: string; }) {
     const ctx = useContext(APPLICATION_CONTEXT);
@@ -38,11 +40,17 @@ export function JobList({ className }: { className?: string; }) {
         <div className={className}>
             {state.loading ?
                 <progress className="progress is-small is-info my-6" max="100">loading</progress>
-                : state.jobs.map(j => (
-                    <Link key={j.id} to={`${links.activeJobs}/${j.id}`} className={`column ${state.jobs.length == 1 ? 'is-12' : 'is-4-fullhd is-6-desktop is-12-touch'} list-item`}>
-                        <JobListItem job={j} />
-                    </Link>
-                ))}
+                :
+                <>
+                    {state.jobs.length < 1 &&
+                        <Empty style={{ background: 'transparent' }} text='No Active Job Available!' icon={<FaHardHat className='has-text-warning-dark is-size-4 mb-2' />} />}
+                    {state.jobs.map(j => (
+                        <Link key={j.id} to={`${links.activeJobs}/${j.id}`} className={`column ${state.jobs.length == 1 ? 'is-12' : 'is-4-fullhd is-6-desktop is-12-touch'} list-item`}>
+                            <JobListItem job={j} />
+                        </Link>
+                    ))}
+                </>
+            }
         </div>
     );
 }

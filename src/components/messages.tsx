@@ -10,6 +10,7 @@ import links from "../lib/links";
 import { IChatItem, IMessage, Message } from "../lib/message";
 import { User } from '../lib/user';
 import { Empty } from "./util";
+import logo from '../logo_runner.jpg'
 import { useDebouncedCallback } from "use-debounce";
 
 export const ChatContext = createContext<{ chats: IChatItem[], setChats: (messages: IChatItem[]) => any }>({ chats: [], setChats: (chats) => { } })
@@ -87,11 +88,11 @@ export function MessageListItem({ chat, to }: { chat: IChatItem, to: any }) {
                     <div className='columns '>
                         <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                             <figure className='image is-flex is-48x48'>
-                                <img className='is-rounded' src={chat.recipient.profilePhoto} />
+                                <img className='is-rounded' onError={(img) => img.currentTarget.src = logo} src={chat.recipient.profilePhoto} />
                             </figure>
                         </div>
                         <div className='column'>
-                            <div className='columns mb-0 is-mobile name-bar'>
+                            <div className='columns mb-0 is-mobile is-vcentered name-bar'>
                                 <div className='has-text-left column has-text-weight-bold'>
                                     <p>{`${chat.recipient.firstName} ${chat.recipient.lastName}`}</p>
                                 </div>
@@ -99,7 +100,7 @@ export function MessageListItem({ chat, to }: { chat: IChatItem, to: any }) {
                                     <p>{time.calendar({ sameElse: 'DD/MMM/YYYY' })}</p>
                                 </div>
                             </div>
-                            <div className='content has-text-left'>
+                            <div className='content has-text-left has-text-centered-mobile'>
                                 <p>{chat.last_message!.text}</p>
                             </div>
                         </div>
@@ -120,7 +121,7 @@ export function MessageItem({ message, isCurrentUser, prevMessage, ...props }: {
                     <div className='column is-paddingless is-narrow is-flex' style={{ justifyContent: 'center' }}>
                         <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                             <figure className='image is-32x32 is-flex'>
-                                <img className='is-rounded' src={message.user.profileImageURL} />
+                                <img className='is-rounded' style={{ border: 'solid #eaeaea 0.5px' }} onError={(img) => img.currentTarget.src = logo} src={message.user.profileImageURL} />
                             </figure>
                         </div>
                         <div className='column is-size-7'>

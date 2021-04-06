@@ -1,6 +1,6 @@
 import moment from "moment";
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { FaCaretDown, FaCaretUp, FaCheck, FaMapMarkerAlt, FaSearch } from 'react-icons/fa';
+import { FaCaretDown, FaCaretUp, FaCheck, FaMapMarkerAlt, FaSearch, FaBell } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { APPLICATION_CONTEXT } from "../lib";
 import { User } from "../lib/user";
@@ -87,12 +87,12 @@ export function NotificationList({ className }) {
                 <div style={{ transition: "all 0.500s linear" }} className={`${!expanded ? 'is-height-0' : ''}`}>
                     {notifCtx.notifications.length > 0 ?
                         notifCtx.notifications.map((n, index) => (
-                            <Link key={`${n.id}-${index}`} to={`/f`} className='panel-block'>
+                            <div key={`${n.id}-${index}`} className='panel-block'>
                                 <NotificationItem notification={n} />
-                            </Link>
+                            </div>
                         ))
                         :
-                        <Empty text='No Notification available' />
+                        <Empty icon={<FaBell className='has-text-warning-dark is-size-4 mb-2' />} text='No Notification available' />
                     }
                 </div>
             </div>

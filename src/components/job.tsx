@@ -254,7 +254,7 @@ export function JobDetailTask({ job, onJobCancel }: { job: IJob, onJobCancel }) 
                             </tr>
                             <tr className='is-flex has-text-left'>
                                 <td style={{ flex: 1 }} className='has-text-grey'>PAY</td>
-                                <td style={{ flex: 2 }} className='is-flex-align-items-center is-flex has-text-left'><span>${job.salary}</span>&nbsp;<span className='has-text-grey-light'>/{job.wage}</span></td>
+                                <td style={{ flex: 2 }} className='is-flex-align-items-center is-flex has-text-left'><span>${job.salary}</span>&nbsp;<span className='has-text-grey-light'>/{job.wage || 'deployment'}</span></td>
                             </tr>
                             {job.tasks && job.tasks.length > 0 ?
                                 <tr className='is-flex has-text-left'>
