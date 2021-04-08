@@ -13,6 +13,7 @@ import { APPLICATION_CONTEXT } from '../lib';
 import { MapView } from './map';
 import links from '../lib/links';
 import { Message, IChatItem } from '../lib/message';
+import logo from '../logo.jpg'
 
 export function JobListItem({ job }: { job: IJob }) {
     const ctx = useContext(APPLICATION_CONTEXT)
@@ -170,7 +171,7 @@ export function JobDetail({ job, className, onCancel }: { onCancel: (job: IJob) 
     return (
         <div className={`${className} card job-detail is-size-6`} style={{ flexDirection: 'column' }}>
             <div className='card-content is-paddingless'>
-                <div className='level py-4 mb-0'>
+                <div className='level py-4 mb-0' style={{ zIndex: 1 }}>
                     <div className='level-item is-size-7'>POSTED {time.calendar({ sameElse: 'DD/MMM/YYYY' })}</div>
                     <div className='level-item is-size-6 has-text-weight-bold'>{job.job_title}</div>
                     <div className='level-item is-size-7 has-text-grey'>{job.id}</div>
@@ -299,7 +300,7 @@ export function JobDetailUser({ job }: { job: IJob }) {
             <div style={{ borderBottom: 'solid #aaa4 0.2px' }} className='columns is-vcentered'>
                 <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                     <figure className='image is-80x80 is-flex'>
-                        <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} />
+                        <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} style={{ border: 'solid #eaeaea 0.5px' }} onError={(img) => img.currentTarget.src = logo} />
                     </figure>
                 </div>
                 <div className='column'>
@@ -377,7 +378,7 @@ export function JobReview({ job }: { job: IJob }) {
                 <div className='columns column is-vcentered'>
                     <div className='column is-narrow is-flex' style={{ justifyContent: 'center' }}>
                         <figure className='image is-80x80 is-flex'>
-                            <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} />
+                            <img className='is-rounded' src={Job.getPhotoURL(ctx, job.user?.id)} style={{ border: 'solid #eaeaea 0.5px' }} onError={(img) => img.currentTarget.src = logo} />
                         </figure>
                     </div>
                     <div className='column'>
