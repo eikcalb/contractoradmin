@@ -29,7 +29,7 @@ export interface IInvoice {
     invoiceReference: string
     description?: string
     jobTitle?: string
-    jobStatus?: string
+    status?: string
     location?: string
     amount: string
     fees: string
@@ -37,7 +37,6 @@ export interface IInvoice {
     deployee?: string
     paymentMethod: string
     invoiceURL: string
-    transactionStatus: string
     transactionID: string
     user: String
     dateCreated: Date

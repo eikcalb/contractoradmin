@@ -186,7 +186,7 @@
     border-left: solid #3298dc 2px;
 }
 
-.is-active .settings-link>* {
+.is-active .settings-link {
     border-bottom: solid 2px #3298dc;
 }
 
